@@ -32,7 +32,9 @@
 (projectile-global-mode)
 (setq projectile-enable-caching t)
 (setq projectile-completion-system 'grizzl)
-;; Press Command-p for fuzzy find in project
-(global-set-key (kbd "s-p") 'projectile-find-file)
-;; Press Command-b for fuzzy switch buffer
-(global-set-key (kbd "s-b") 'projectile-switch-to-buffer)
+;; Press Meta-p for fuzzy find in project
+(global-set-key (kbd "M-p") 'projectile-find-file)
+;; Press Meta-b for fuzzy switch buffer
+(global-set-key (kbd "M-b") 'projectile-switch-to-buffer)
+;; Press Meta-s to save the current buffer
+(global-set-key (kbd "M-s") 'save-buffer)
