@@ -4,6 +4,7 @@
 (depends-on "auto-complete")
 (depends-on "enh-ruby-mode")
 (depends-on "grizzl")
+(depends-on "multiple-cursors")
 (depends-on "pallet")
 (depends-on "projectile")
 (depends-on "rinari")
