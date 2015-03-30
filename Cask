@@ -6,5 +6,6 @@
 (depends-on "grizzl")
 (depends-on "pallet")
 (depends-on "projectile")
+(depends-on "rinari")
 (depends-on "robe")
 (depends-on "smartparens")
