@@ -11,3 +11,12 @@
 	     "~/.emacs.d/.cask/24.4.1/elpa/auto-complete-20150322.813/dict")
 (ac-config-default)
 (setq ac-ignore-case nil)
+
+;; smartparens config
+(require 'smartparens-config)
+(require 'smartparens-ruby)
+(smartparens-global-mode)
+(show-smartparens-global-mode t)
+(sp-with-modes '(rhtml-mode)
+  (sp-local-pair "<" ">")
+  (sp-local-pair "<%" "%>"))
