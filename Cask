@@ -10,3 +10,4 @@
 (depends-on "rinari")
 (depends-on "robe")
 (depends-on "smartparens")
+(depends-on "web-mode")
