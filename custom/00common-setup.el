@@ -8,6 +8,8 @@
 ;; Enable copy and pasting from clipboard
 (setq x-select-enable-clipboard t)
 
+;; Enable line numbers
+(global-linum-mode)
 
 ;; auto-complete config
 (require 'auto-complete-config)

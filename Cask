@@ -7,6 +7,7 @@
 (depends-on "multiple-cursors")
 (depends-on "pallet")
 (depends-on "projectile")
+(depends-on "rbenv")
 (depends-on "rinari")
 (depends-on "robe")
 (depends-on "smartparens")
