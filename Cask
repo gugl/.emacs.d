@@ -1,4 +1,5 @@
 (source melpa)
 
-(depends-on "pallet")
+(depends-on "ag")
 (depends-on "auto-complete")
+(depends-on "pallet")
