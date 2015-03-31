@@ -54,5 +54,5 @@ of FILE in the current directory, suitable for creation"
 (add-hook 'enh-ruby-mode-hook
           (lambda ()
             (local-set-key (kbd "C-c l") 'rspec-compile-on-line)
-            (local-set-key (kbd "C-c k") 'rspec-compile-file)
+            (local-set-key (kbd "M-r") 'rspec-compile-file)
             ))
