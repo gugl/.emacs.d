@@ -11,6 +11,12 @@
 ;; Enable line numbers
 (global-linum-mode)
 
+(load-theme 'monokai t)
+
+(require 'neotree)
+(global-set-key [f8] 'neotree-toggle)
+(global-set-key (kbd "M-\\") 'neotree-toggle)
+
 ;; auto-complete config
 (require 'auto-complete-config)
 (add-to-list 'ac-dictionary-directories
