@@ -9,6 +9,9 @@
 (setq x-select-enable-clipboard t)
 
 (setq-default indent-tabs-mode nil)
+(setq-default tab-width 2)
+(defvaralias 'c-basic-offset 'tab-with)
+
 
 ;; ============================================================================
 ;; Git
@@ -58,6 +61,7 @@
 
 (require 'grizzl)
 (projectile-global-mode)
+(setq projectile-switch-project-action 'neotree-projectile-action)
 (setq projectile-enable-caching t)
 (setq projectile-completion-system 'grizzl)
 ;; Press Meta-p for fuzzy find in project

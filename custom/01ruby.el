@@ -56,3 +56,5 @@ of FILE in the current directory, suitable for creation"
             (local-set-key (kbd "C-c l") 'rspec-compile-on-line)
             (local-set-key (kbd "M-r") 'rspec-compile-file)
             ))
+
+(add-hook 'projectile-mode-hook 'projectile-rails-on)
