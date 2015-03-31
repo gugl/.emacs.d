@@ -8,11 +8,6 @@
 ;; Enable copy and pasting from clipboard
 (setq x-select-enable-clipboard t)
 
-;; Enable line numbers
-(global-linum-mode)
-
-(load-theme 'monokai t)
-
 (require 'neotree)
 (global-set-key [f8] 'neotree-toggle)
 (global-set-key (kbd "M-\\") 'neotree-toggle)
@@ -44,3 +39,17 @@
 (global-set-key (kbd "M-b") 'projectile-switch-to-buffer)
 ;; Press Meta-s to save the current buffer
 (global-set-key (kbd "M-s") 'save-buffer)
+
+;; =============================================================================
+;; UI
+;; =============================================================================
+
+(load-theme 'monokai t)
+(global-linum-mode t)
+(setq-default truncate-lines t)
+
+(defun linum-format-func (line)
+  (let ((w (length (number-to-string (count-lines (point-min) (point-max))))))
+    (propertize (format (format "%%%dd " w) line) 'face 'linum)))
+
+(setq linum-format 'linum-format-func)
