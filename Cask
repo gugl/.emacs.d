@@ -2,7 +2,10 @@
 
 (depends-on "ag")
 (depends-on "auto-complete")
+(depends-on "color-theme-sanityinc-tomorrow")
+(depends-on "darcula-theme")
 (depends-on "enh-ruby-mode")
+(depends-on "exec-path-from-shell")
 (depends-on "feature-mode")
 (depends-on "git-gutter")
 (depends-on "grizzl")
@@ -14,6 +17,7 @@
 (depends-on "pallet")
 (depends-on "projectile")
 (depends-on "projectile-rails")
+(depends-on "railscasts-theme")
 (depends-on "rbenv")
 (depends-on "rinari")
 (depends-on "robe")

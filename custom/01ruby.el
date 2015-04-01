@@ -35,14 +35,21 @@ of FILE in the current directory, suitable for creation"
      return nil)))
  
 (require 'compile)
- 
+
+(setq compilation-scroll-output "first-error")
+
+(defun rspec-compile-all ()
+  (interactive)
+  (compile (format (concat "cd " (get-closest-gemfile-root) ";bundle exec rspec")) t))
+
 (defun rspec-compile-file ()
   (interactive)
+  ()
   (compile (format "cd %s;bundle exec rspec %s"
                    (get-closest-gemfile-root)
                    (file-relative-name (buffer-file-name) (get-closest-gemfile-root))
                    ) t))
- 
+
 (defun rspec-compile-on-line ()
   (interactive)
   (compile (format "cd %s;bundle exec rspec %s -l %s"
@@ -53,8 +60,8 @@ of FILE in the current directory, suitable for creation"
  
 (add-hook 'enh-ruby-mode-hook
           (lambda ()
-            (local-set-key (kbd "C-c l") 'rspec-compile-on-line)
-            (local-set-key (kbd "M-r") 'rspec-compile-file)
+            (local-set-key (kbd "C-s-r") 'rspec-compile-on-line)
+            (local-set-key (kbd "s-r") 'rspec-compile-file)
             ))
 
 (add-hook 'projectile-mode-hook 'projectile-rails-on)

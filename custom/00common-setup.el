@@ -8,9 +8,14 @@
 ;; Enable copy and pasting from clipboard
 (setq x-select-enable-clipboard t)
 
+;; Tab size
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 2)
 (defvaralias 'c-basic-offset 'tab-with)
+
+;; Copy shell evn variables to the emacs environment (fixes some issues with Emacs.app on Mac OS X)
+(when (memq window-system '(mac ns))
+    (exec-path-from-shell-initialize))
 
 
 ;; ============================================================================
@@ -65,11 +70,11 @@
 (setq projectile-enable-caching t)
 (setq projectile-completion-system 'grizzl)
 ;; Press Meta-p for fuzzy find in project
-(global-set-key (kbd "M-p") 'projectile-find-file)
+(global-set-key (kbd "s-p") 'projectile-find-file)
 ;; Press Meta-b for fuzzy switch buffer
-(global-set-key (kbd "M-b") 'projectile-switch-to-buffer)
+(global-set-key (kbd "s-b") 'projectile-switch-to-buffer)
 ;; Press Meta-s to save the current buffer
-(global-set-key (kbd "M-s") 'save-buffer)
+(global-set-key (kbd "s-s") 'save-buffer)
 
 
 ;; ============================================================================
@@ -100,7 +105,22 @@
 ;; UI
 ;; =============================================================================
 
-(load-theme 'monokai t)
+;; (load-theme 'monokai t)
+
+;; Darkula theme
+;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/emacs-color-theme-darkula")
+;; (load-theme 'Darkula t)
+
+;; (require 'color-theme-sanityinc-tomorrow)
+
+(load-theme 'railscasts t nil)
+
+;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/railscasts-theme")
+;; (load-theme 'railscasts t nil)
+
+;; (require 'darcula-theme)
+(set-frame-font "Menlo-12")
+
 (global-linum-mode t)
 (setq-default truncate-lines t)
 
@@ -109,3 +129,6 @@
     (propertize (format (format "%%%dd " w) line) 'face 'linum)))
 
 (setq linum-format 'linum-format-func)
+
+(add-to-list 'load-path "~/.emacs.d/vendor/emacs-powerline")
+(require 'powerline)
