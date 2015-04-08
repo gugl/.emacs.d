@@ -2,6 +2,7 @@
 
 (depends-on "ag")
 (depends-on "auto-complete")
+(depends-on "bundler")
 (depends-on "color-theme-sanityinc-tomorrow")
 (depends-on "darcula-theme")
 (depends-on "enh-ruby-mode")
@@ -23,4 +24,5 @@
 (depends-on "robe")
 (depends-on "sass-mode")
 (depends-on "smartparens")
+(depends-on "tabbar")
 (depends-on "web-mode")

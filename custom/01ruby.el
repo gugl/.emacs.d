@@ -65,3 +65,5 @@ of FILE in the current directory, suitable for creation"
             ))
 
 (add-hook 'projectile-mode-hook 'projectile-rails-on)
+
+; (define-key projectile-rails-mode-map (kbd "s-RET") 'projectile-rails-goto-file-at-point)
