@@ -1,0 +1,10 @@
+# cask packages
+.cask/
+
+# elpa packages
+elpa/
+
+*.cache
+
+projectile-bookmarks.eld
+ac-comphist.dat
