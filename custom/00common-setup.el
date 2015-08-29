@@ -1,6 +1,7 @@
 ;; Mac OS X keyboard mapping
 (setq mac-option-modifier 'meta)
-(setq mac-command-modifier 'super)
+(setq mac-command-modifier 'meta)
+;; (setq mac-command-modifier 'super)
 
 ;; Navigate between windows using Alt-1, Alt-2, Shift-left, shift-up, shift-right
 (windmove-default-keybindings)
@@ -22,9 +23,9 @@
 ;; Git
 ;; ============================================================================
 
-(require 'git-gutter)
-(global-git-gutter-mode t)
-(git-gutter:linum-setup)
+;; (require 'git-gutter)
+;; (global-git-gutter-mode t)
+;; (git-gutter:linum-setup)
 
 
 ;; ============================================================================
@@ -32,7 +33,7 @@
 ;; ============================================================================
 
 (require 'neotree)
-(global-set-key [f8] 'neotree-toggle)
+;; (global-set-key [f8] 'neotree-toggle)
 (global-set-key (kbd "M-\\") 'neotree-toggle)
 
 
@@ -40,12 +41,23 @@
 ;; Auto-complete
 ;; ============================================================================
 
-(require 'auto-complete-config)
-(add-to-list 'ac-dictionary-directories
-	     "~/.emacs.d/.cask/24.4.1/elpa/auto-complete-20150322.813/dict")
-(ac-config-default)
-(setq ac-ignore-case nil)
+;; (require 'auto-complete-config)
+;; (add-to-list 'ac-dictionary-directories
+;;	     "~/.emacs.d/.cask/24.4.1/elpa/auto-complete-20150322.813/dict")
+;; (ac-config-default)
+;;(setq ac-ignore-case nil)
 
+(global-company-mode t)
+;; (add-hook 'after-init-hook 'global-company-mode)
+
+(setq company-tooltip-limit 12)                      ; bigger popup window
+(setq company-idle-delay .1)                         ; decrease delay before autocompletion popup shows
+(setq company-echo-delay 0)                          ; remove annoying blinking
+(setq company-begin-commands '(self-insert-command)) ; start autocompletion only after typing
+(setq company-dabbrev-downcase nil)                  ; Do not convert to lowercase
+(setq company-selection-wrap-around t)               ; continue from top when reaching bottom
+
+(require 'helm-config)
 
 ;; ============================================================================
 ;; Smartparens
@@ -69,12 +81,14 @@
 (setq projectile-switch-project-action 'neotree-projectile-action)
 (setq projectile-enable-caching t)
 (setq projectile-completion-system 'grizzl)
+;; (global-set-key (kbd "s-p") 'projectile-find-file)
+;; (global-set-key (kbd "s-t") 'projectile-find-file)
 ;; Press Meta-p for fuzzy find in project
-(global-set-key (kbd "s-p") 'projectile-find-file)
+(global-set-key (kbd "C-c t") 'projectile-find-file)
 ;; Press Meta-b for fuzzy switch buffer
 (global-set-key (kbd "s-b") 'projectile-switch-to-buffer)
 ;; Press Meta-s to save the current buffer
-(global-set-key (kbd "s-s") 'save-buffer)
+;; (global-set-key (kbd "s-s") 'save-buffer)
 
 
 ;; ============================================================================
