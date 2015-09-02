@@ -136,7 +136,7 @@
 (set-frame-font "Menlo-12")
 
 (global-linum-mode t)
-(setq-default truncate-lines t)
+;; (setq-default truncate-lines t)
 
 (defun linum-format-func (line)
   (let ((w (length (number-to-string (count-lines (point-min) (point-max))))))
