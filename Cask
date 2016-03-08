@@ -37,6 +37,7 @@
 (depends-on "package-build")
 (depends-on "pallet")
 (depends-on "popup")
+(depends-on "powerline")
 (depends-on "projectile")
 (depends-on "projectile-rails")
 (depends-on "railscasts-theme")

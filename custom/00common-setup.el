@@ -163,8 +163,9 @@
 
 (setq linum-format 'linum-format-func)
 
-(add-to-list 'load-path "~/.emacs.d/vendor/emacs-powerline")
+;;(add-to-list 'load-path "~/.emacs.d/vendor/emacs-powerline")
 (require 'powerline)
+(powerline-default-theme)
 
 ;; When activated it makes the typewriter sound when you type
 (require 'selectric-mode)
