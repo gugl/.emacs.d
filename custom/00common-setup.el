@@ -1,13 +1,24 @@
 ;; Mac OS X keyboard mapping
 (setq mac-option-modifier 'meta)
-(setq mac-command-modifier 'meta)
+;; (setq mac-command-modifier 'meta)
 ;; (setq mac-command-modifier 'super)
+(setq mac-right-command-modifier 'meta)
 
 ;; Navigate between windows using Alt-1, Alt-2, Shift-left, shift-up, shift-right
 (windmove-default-keybindings)
 
 ;; Enable copy and pasting from clipboard
 (setq x-select-enable-clipboard t)
+
+;; Disable Scrollbar
+(toggle-scroll-bar -1)
+
+;; Disable Toolbar
+(tool-bar-mode -1)
+
+;; Enable Winner mode for switching between window configurations
+(winner-mode t)
+(global-set-key (kbd "M-o") 'other-window)
 
 ;; Tab size
 (setq-default indent-tabs-mode nil)
@@ -35,6 +46,13 @@
 (require 'neotree)
 ;; (global-set-key [f8] 'neotree-toggle)
 (global-set-key (kbd "M-\\") 'neotree-toggle)
+
+;; ============================================================================
+;; IDO
+;; ============================================================================
+
+(ido-mode t)
+(setq ido-enable-flex-matching t)
 
 
 ;; ============================================================================
@@ -84,7 +102,8 @@
 ;; (global-set-key (kbd "s-p") 'projectile-find-file)
 ;; (global-set-key (kbd "s-t") 'projectile-find-file)
 ;; Press Meta-p for fuzzy find in project
-(global-set-key (kbd "C-c t") 'projectile-find-file)
+;; (global-set-key (kbd "C-c t") 'projectile-find-file)
+(global-set-key (kbd "C-c f") 'projectile-find-file)
 ;; Press Meta-b for fuzzy switch buffer
 (global-set-key (kbd "s-b") 'projectile-switch-to-buffer)
 ;; Press Meta-s to save the current buffer
@@ -146,3 +165,7 @@
 
 (add-to-list 'load-path "~/.emacs.d/vendor/emacs-powerline")
 (require 'powerline)
+
+;; When activated it makes the typewriter sound when you type
+(require 'selectric-mode)
+

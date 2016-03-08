@@ -52,7 +52,7 @@ of FILE in the current directory, suitable for creation"
 
 (defun rspec-compile-on-line ()
   (interactive)
-  (compile (format "cd %s;bundle exec rspec %s -l %s"
+  (compile (format "cd %s;rspec %s -l %s"
                    (get-closest-gemfile-root)
                    (file-relative-name (buffer-file-name) (get-closest-gemfile-root))
                    (line-number-at-pos)
@@ -61,6 +61,7 @@ of FILE in the current directory, suitable for creation"
 (add-hook 'enh-ruby-mode-hook
           (lambda ()
             (local-set-key (kbd "C-s-r") 'rspec-compile-on-line)
+            (local-set-key (kbd "C-c r") 'rspec-compile-on-line)
             (local-set-key (kbd "s-r") 'rspec-compile-file)
             ))
 
