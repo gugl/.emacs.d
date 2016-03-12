@@ -12,9 +12,6 @@
              '("gnu" . "http://elpa.gnu.org/packages/") t)
 (package-initialize)
 
-
-
-
 (add-to-list 'load-path "~/.emacs.d/custom")
 
 (load "00common-setup.el")
@@ -28,8 +25,11 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(display-battery-mode t)
- '(size-indication-mode t))
+ '(display-battery-mode nil)
+ '(global-rbenv-mode t)
+ '(rbenv-installation-dir "/usr/local/opt/rbenv")
+ '(rbenv-show-active-ruby-in-modeline nil)
+ '(size-indication-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

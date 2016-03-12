@@ -157,16 +157,11 @@
 (global-linum-mode t)
 ;; (setq-default truncate-lines t)
 
-(defun linum-format-func (line)
-  (let ((w (length (number-to-string (count-lines (point-min) (point-max))))))
-    (propertize (format (format "%%%dd " w) line) 'face 'linum)))
+;; (defun linum-format-func (line)
+;;   (let ((w (length (number-to-string (count-lines (point-min) (point-max))))))
+;;     (propertize (format (format "%%%dd " w) line) 'face 'linum)))
+;; (setq linum-format 'linum-format-func)
 
-(setq linum-format 'linum-format-func)
-
-;;(add-to-list 'load-path "~/.emacs.d/vendor/emacs-powerline")
 (require 'powerline)
 (powerline-default-theme)
-
-;; When activated it makes the typewriter sound when you type
-(require 'selectric-mode)
 
