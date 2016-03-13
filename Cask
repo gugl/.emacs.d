@@ -25,6 +25,7 @@
 (depends-on "haml-mode")
 (depends-on "helm")
 (depends-on "helm-core")
+(depends-on "highlight-indentation")
 (depends-on "inf-ruby")
 (depends-on "js2-mode")
 (depends-on "jump")
