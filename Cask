@@ -42,6 +42,7 @@
 (depends-on "projectile")
 (depends-on "projectile-rails")
 (depends-on "railscasts-theme")
+(depends-on "rainbow-mode")
 (depends-on "rbenv")
 (depends-on "rinari")
 (depends-on "robe")

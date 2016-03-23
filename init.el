@@ -19,6 +19,7 @@
 (load "02org-mode.el")
 (load "03elixir.el")
 (load "04react.el")
+(load "05email.el")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
