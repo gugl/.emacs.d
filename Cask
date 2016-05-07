@@ -59,6 +59,7 @@
 (depends-on "s")
 (depends-on "sass-mode")
 (depends-on "scss-mode")
+(depends-on "seq")
 (depends-on "shut-up")
 (depends-on "slim-mode")
 (depends-on "smartparens")
