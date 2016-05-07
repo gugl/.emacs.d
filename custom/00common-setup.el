@@ -31,6 +31,17 @@
 
 
 ;; ============================================================================
+;; Highlight Symbol under point
+;; ============================================================================
+
+(require 'highlight-symbol)
+(global-set-key [(control f3)] 'highlight-symbol)
+(global-set-key [f3] 'highlight-symbol-next)
+(global-set-key [(shift f3)] 'highlight-symbol-prev)
+(global-set-key [(meta f3)] 'highlight-symbol-query-replace)
+
+
+;; ============================================================================
 ;; Git
 ;; ============================================================================
 
@@ -38,14 +49,44 @@
 ;; (global-git-gutter-mode t)
 ;; (git-gutter:linum-setup)
 
+;; Gitflow plugin for Magit.
+
+(require 'magit-gitflow)
+(add-hook 'magit-mode-hook 'turn-on-magit-gitflow)
+
+;; C-f in magit status buffer will invoke the gitflow popup.
+
+
 
 ;; ============================================================================
 ;; Neotree
 ;; ============================================================================
 
 (require 'neotree)
+
 ;; (global-set-key [f8] 'neotree-toggle)
 (global-set-key (kbd "M-\\") 'neotree-toggle)
+(global-set-key [f8] 'neotree-toggle)
+
+;; Every time when the neotree window is opened, let it find current file and jump to node.
+(setq neo-smart-open t)
+
+;; When running ‘projectile-switch-project’ (C-c p p), ‘neotree’ will change root automatically.
+(setq projectile-switch-project-action 'neotree-projectile-action)
+
+;; ============================================================================
+;; YaSnippets
+;; ============================================================================
+
+(require 'yasnippet)
+(yas-global-mode 1)
+
+;; ============================================================================
+;; js2-refactor
+;; ============================================================================
+
+;; Seems not to work
+;; (js2r-add-keybindings-with-prefix "C-c C-m")
 
 ;; ============================================================================
 ;; IDO

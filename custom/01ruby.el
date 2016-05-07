@@ -45,6 +45,7 @@ of FILE in the current directory, suitable for creation"
 (defun rspec-compile-file ()
   (interactive)
   ()
+  (save-buffer)
   (compile (format "cd %s;bundle exec rspec %s"
                    (get-closest-gemfile-root)
                    (file-relative-name (buffer-file-name) (get-closest-gemfile-root))
