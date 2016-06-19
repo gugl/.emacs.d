@@ -13,6 +13,7 @@
 (depends-on "company")
 (depends-on "darcula-theme")
 (depends-on "dash")
+(depends-on "diff-hl")
 (depends-on "discover")
 (depends-on "discover-js2-refactor")
 (depends-on "discover-my-major")

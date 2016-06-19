@@ -437,7 +437,7 @@ Set the default tab size to 2
   (add-hook 'focus-out-hook 'save-all)
 #+END_SRC
   
-* User interface
+* UI preferences
 
 ** Theme and font
 
@@ -453,6 +453,16 @@ Set the default tab size to 2
   (tool-bar-mode -1)
 #+END_SRC
   
+** Highlight uncommitted changes
+Use the =diff-hl= package to highlight changed-and-uncommitted lines when programming.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'diff-hl)
+
+  (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
+  (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode)
+#+END_SRC
+
 ** Window navigation
   
 Navigate between windows using Alt-1, Alt-2, Shift-left, shift-up, shift-right
