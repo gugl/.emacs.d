@@ -1,25 +1,4 @@
-;; (require 'cask "~/.cask/cask.el")
-(require 'cask "~/.emacs.d/.cask/24.5.1/elpa/cask-20151123.528/cask.el")
-(cask-initialize)
-(require 'pallet)
-(pallet-mode t)
-
-
-(require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
-(add-to-list 'package-archives
-             '("gnu" . "http://elpa.gnu.org/packages/") t)
-(package-initialize)
-
-(add-to-list 'load-path "~/.emacs.d/custom")
-
-(load "00common-setup.el")
-(load "01ruby.el")
-(load "02org-mode.el")
-(load "03elixir.el")
-(load "04react.el")
-(load "05email.el")
+(org-babel-load-file "~/.emacs.d/configuration.org")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.

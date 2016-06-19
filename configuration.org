@@ -1,0 +1,497 @@
+#+TITLE: Emacs configuration
+
+* Set personal information
+
+#+BEGIN_SRC emacs-lisp
+  (setq user-full-name "Günter Glück"
+        user-mail-address "gugl@guenterglueck.com"
+        calendar-latitude 48.209206
+        calendar-longitude 16.372778
+        calendar-location-name "Vienna, Austria")
+#+END_SRC
+
+* Package management
+
+I use =cask= and =pallet= for managing packages.
+
+#+BEGIN_SRC emacs-lisp
+  ;; (require 'cask "~/.cask/cask.el")
+  (require 'cask "~/.emacs.d/.cask/24.5.1/elpa/cask-20151123.528/cask.el")
+  (cask-initialize)
+  (require 'pallet)
+  (pallet-mode t)
+
+  (require 'package)
+  (add-to-list 'package-archives
+               '("melpa" . "http://melpa.org/packages/") t)
+  (add-to-list 'package-archives
+               '("gnu" . "http://elpa.gnu.org/packages/") t)
+  (package-initialize)
+#+END_SRC
+
+* Mac OS X
+
+** keyboard mapping
+
+I use all option keys and the right command key as meta.
+
+#+BEGIN_SRC emacs-lisp
+  (setq mac-option-modifier 'meta)
+  ;; (setq mac-command-modifier 'meta)
+  ;; (setq mac-command-modifier 'super)
+  (setq mac-right-command-modifier 'meta)
+#+END_SRC
+
+** Environment variables for Emacs.app
+
+Copy shell env variables to the emacs environment (fixes some issues with Emacs.app on Mac OS X)
+
+#+BEGIN_SRC emacs-lisp
+  (when (memq window-system '(mac ns))
+      (exec-path-from-shell-initialize))
+#+END_SRC
+
+  
+* Highlight Symbol under point
+  
+#+BEGIN_SRC emacs-lisp
+  (require 'highlight-symbol)
+  (global-set-key [(control f3)] 'highlight-symbol)
+  (global-set-key [f3] 'highlight-symbol-next)
+  (global-set-key [(shift f3)] 'highlight-symbol-prev)
+  (global-set-key [(meta f3)] 'highlight-symbol-query-replace)
+#+END_SRC
+
+
+  
+* Neotree
+
+#+BEGIN_SRC emacs-lisp
+  (require 'neotree)
+  
+  (global-set-key (kbd "M-\\") 'neotree-toggle)
+  (global-set-key [f8] 'neotree-toggle)
+  
+  (setq neo-smart-open nil)
+  
+  ;; When running ‘projectile-switch-project’ (C-c p p), ‘neotree’ will change root automatically.
+  (setq projectile-switch-project-action 'neotree-projectile-action)
+#+END_SRC
+  
+
+* Programming
+** Git and Gitflow
+C-f in magit status buffer will invoke the gitflow popup.
+
+#+BEGIN_SRC emacs-lisp
+  ;; (require 'git-gutter)
+  ;; (global-git-gutter-mode t)
+  ;; (git-gutter:linum-setup)
+  
+  (require 'magit-gitflow)
+  (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)
+#+END_SRC
+
+** YaSnippets
+  
+#+BEGIN_SRC emacs-lisp
+  (require 'yasnippet)
+  (yas-global-mode 1)
+#+END_SRC
+  
+** js2-refactor
+
+#+BEGIN_SRC emacs-lisp
+  ;; Seems not to work
+  ;; (js2r-add-keybindings-with-prefix "C-c C-m")
+#+END_SRC
+
+** IDO
+  
+#+BEGIN_SRC emacs-lisp
+  (ido-mode t)
+  (setq ido-enable-flex-matching t)
+#+END_SRC
+  
+** Smartparens
+  
+#+BEGIN_SRC emacs-lisp
+  (require 'smartparens-config)
+  (require 'smartparens-ruby)
+  (smartparens-global-mode)
+  (show-smartparens-global-mode t)
+  (sp-with-modes '(rhtml-mode)
+    (sp-local-pair "<" ">")
+    (sp-local-pair "<%" "%>"))
+#+END_SRC
+
+** Projectile
+  
+#+BEGIN_SRC emacs-lisp
+  (require 'grizzl)
+  (projectile-global-mode)
+  (setq projectile-switch-project-action 'neotree-projectile-action)
+  (setq projectile-enable-caching t)
+  (setq projectile-completion-system 'grizzl)
+  ;; (global-set-key (kbd "s-p") 'projectile-find-file)
+  ;; (global-set-key (kbd "s-t") 'projectile-find-file)
+  ;; Press Meta-p for fuzzy find in project
+  ;; (global-set-key (kbd "C-c t") 'projectile-find-file)
+  (global-set-key (kbd "C-c f") 'projectile-find-file)
+  ;; Press Meta-b for fuzzy switch buffer
+  (global-set-key (kbd "s-b") 'projectile-switch-to-buffer)
+  ;; Press Meta-s to save the current buffer
+  ;; (global-set-key (kbd "s-s") 'save-buffer)
+#+END_SRC
+
+** Cucumber
+  
+#+BEGIN_SRC emacs-lisp
+  (require 'feature-mode)
+  (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
+  (add-to-list 'auto-mode-alist '("\\.feature$" . feature--mode))
+  (add-hook 'feature-mode-hook
+            (lambda ()
+              (local-set-key (kbd "M-r") 'feature-verify-scenario-at-pos)
+              ))
+#+END_SRC
+  
+** Tab size
+Set the default tab size to 2
+
+#+BEGIN_SRC emacs-lisp
+  (setq-default indent-tabs-mode nil)
+  (setq-default tab-width 2)
+  (defvaralias 'c-basic-offset 'tab-with)
+#+END_SRC
+  
+
+
+** Ruby
+
+#+BEGIN_SRC emacs-lisp
+  (setq enh-ruby-program "/usr/local/opt/rbenv/shims/ruby")
+  (add-hook 'ruby-mode-hook 'robe-mode)
+  (add-hook 'enh-ruby-mode-hook 'robe-mode)
+  
+  ;; Setting rbenv path
+  (setq rbenv-installation-dir "/usr/local/opt/rbenv")
+  (require 'rbenv)
+  (global-rbenv-mode)
+  
+  (autoload 'enh-ruby-mode "enh-ruby-mode" "Major mode for ruby files" t)
+  (add-to-list 'auto-mode-alist '("\\.rb$" . enh-ruby-mode))
+  (add-to-list 'auto-mode-alist '("\\.rake$" . enh-ruby-mode))
+  (add-to-list 'auto-mode-alist '("Rakefile$" . enh-ruby-mode))
+  (add-to-list 'auto-mode-alist '("\\.gemspec$" . enh-ruby-mode))
+  (add-to-list 'auto-mode-alist '("\\.ru$" . enh-ruby-mode))
+  (add-to-list 'auto-mode-alist '("Gemfile$" . enh-ruby-mode))
+   
+  (add-to-list 'interpreter-mode-alist '("ruby" . enh-ruby-mode))
+   
+  (setq enh-ruby-bounce-deep-indent t)
+  (setq enh-ruby-hanging-brace-indent-level 2)
+   
+  (require 'cl) ; If you don't have it already
+   
+  (defun* get-closest-gemfile-root (&optional (file "Gemfile"))
+    "Determine the pathname of the first instance of FILE starting from the current directory towards root.
+  This may not do the correct thing in presence of links. If it does not find FILE, then it shall return the name
+  of FILE in the current directory, suitable for creation"
+    (let ((root (expand-file-name "/"))) ; the win32 builds should translate this correctly
+      (loop 
+       for d = default-directory then (expand-file-name ".." d)
+       if (file-exists-p (expand-file-name file d))
+       return d
+       if (equal d root)
+       return nil)))
+   
+  (require 'compile)
+  
+  (setq compilation-scroll-output "first-error")
+  
+  (defun rspec-compile-all ()
+    (interactive)
+    (compile (format (concat "cd " (get-closest-gemfile-root) ";bundle exec rspec")) t))
+  
+  (defun rspec-compile-file ()
+    (interactive)
+    ()
+    (save-buffer)
+    (compile (format "cd %s;bundle exec rspec %s"
+                     (get-closest-gemfile-root)
+                     (file-relative-name (buffer-file-name) (get-closest-gemfile-root))
+                     ) t))
+  
+  (defun rspec-compile-on-line ()
+    (interactive)
+    (compile (format "cd %s;rspec %s -l %s"
+                     (get-closest-gemfile-root)
+                     (file-relative-name (buffer-file-name) (get-closest-gemfile-root))
+                     (line-number-at-pos)
+                     ) t))
+   
+  (add-hook 'enh-ruby-mode-hook
+            (lambda ()
+              (local-set-key (kbd "C-s-r") 'rspec-compile-on-line)
+              (local-set-key (kbd "C-c r") 'rspec-compile-on-line)
+              (local-set-key (kbd "s-r") 'rspec-compile-file)
+              ))
+  
+  (add-hook 'projectile-mode-hook 'projectile-rails-on)
+  
+  ; (define-key projectile-rails-mode-map (kbd "s-RET") 'projectile-rails-goto-file-at-point)
+  
+#+END_SRC
+
+** Elixir
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'elixir-mode-hook 'alchemist-mode)
+#+END_SRC
+
+** React
+#+BEGIN_SRC emacs-lisp
+  ;; use web-mode for .jsx files
+  (add-to-list 'auto-mode-alist '("\\.jsx$" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.js$" . web-mode))
+  
+  ;; http://www.flycheck.org/manual/latest/index.html
+  (require 'flycheck)
+  
+  ;; turn on flychecking globally
+  (add-hook 'after-init-hook 'global-flycheck-mode)
+  
+  ;; disable jshint since we prefer eslint checking
+  (setq-default flycheck-disabled-checkers
+    (append flycheck-disabled-checkers
+      '(javascript-jshint)))
+  
+  ;; use eslint with web-mode for jsx files
+  (flycheck-add-mode 'javascript-eslint 'web-mode)
+  
+  ;; customize flycheck temp file prefix
+  (setq-default flycheck-temp-prefix ".flycheck")
+  
+  ;; disable json-jsonlist checking for json files
+  (setq-default flycheck-disabled-checkers
+    (append flycheck-disabled-checkers
+      '(json-jsonlist)))
+  
+  ;; https://github.com/purcell/exec-path-from-shell
+  ;; only need exec-path-from-shell on OSX
+  ;; this hopefully sets up path and other vars better
+  ;; (when (memq window-system '(mac ns))
+  ;;   (exec-path-from-shell-initialize))
+  
+  
+  (defun my-setup-indent (n)
+    ;; java/c/c++
+    (setq c-basic-offset n)
+    ;; web development
+    (setq coffee-tab-width n) ; coffeescript
+    (setq javascript-indent-level n) ; javascript-mode
+    (setq js-indent-level n) ; js-mode
+    (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
+    (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
+    (setq web-mode-css-indent-offset n) ; web-mode, css in html file
+    (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
+    (setq css-indent-offset n) ; css-mode
+    )
+  
+  ;; adjust indents for web-mode to 2 spaces
+  (defun my-web-mode-hook ()
+    "Hooks for Web mode. Adjust indents"
+      ;;; http://web-mode.org/
+      (my-setup-indent 2))
+  (add-hook 'web-mode-hook  'my-web-mode-hook)
+  
+  (my-setup-indent 2)
+  
+  ;; for better jsx syntax-highlighting in web-mode
+  ;; - courtesy of Patrick @halbtuerke
+  ;; (defadvice web-mode-highlight-part (around tweak-jsx activate)
+  ;;   (if (equal web-mode-content-type "jsx")
+  ;;      (let ((web-mode-enable-part-face nil))
+  ;;        ad-do-it)
+  ;;        ad-do-it))
+#+END_SRC
+
+
+* Org Mode
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-directory "~/org")
+  (setq org-default-notes-file (concat org-directory "/gtd.org"))
+  (setq org-agenda-files (quote ("~/org")))
+  (setq org-refile-targets '((org-agenda-files :level . 1)))
+  ;; (define-key global-map "\C-cc" 'org-capture)
+  
+  (global-set-key "\C-cl" 'org-store-link)
+  (global-set-key "\C-cc" 'org-capture)
+  (global-set-key "\C-ca" 'org-agenda)
+  (global-set-key "\C-cb" 'org-iswitchb)
+  
+  (setq org-log-done 'time)
+  
+  (setq org-capture-templates
+        '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+           "* TODO %?\n  %i")
+          ("T" "Todo with store-link" entry (file+headline "~/org/gtd.org" "Tasks")
+           "* TODO %?\n  %i\n  %a")
+          ("j" "Journal" entry (file+datetree "~/org/journal.org")
+           "\n* %?\nEntered on %U\n  %i")
+  
+  
+          ;;("J" "Journal wit org-journal" plain (function org-journal-get-entry-path)
+          ;; "** %?")
+  
+  
+          ;;("J" "Journal with store-link" entry (file+datetree "~/org/journal.org")
+          ;; "* %?\nEntered on %U\n  %i\n  %a")
+          ))
+  
+  
+  
+  ;; org-journal
+  (setq org-journal-dir "~/org/journal/")
+#+END_SRC
+
+* Email
+#+BEGIN_SRC emacs-lisp
+  ;; Also look at the following files
+  ;;
+  ;; .mbsyncrc      (sync imap emails)
+  ;; .msmtprc       (send mails)
+  
+  ; add the source shipped with mu to load-path
+  (add-to-list 'load-path (expand-file-name "/usr/local/Cellar/mu/0.9.16/share/emacs/site-lisp/mu/mu4e"))
+  
+  ; make sure emacs finds applications in /usr/local/bin
+  (setq exec-path (cons "/usr/local/bin" exec-path))
+  
+  ; require mu4e
+  (require 'mu4e)
+  
+  ; tell mu4e where my Maildir is
+  (setq mu4e-maildir "~/Maildir")
+  ; tell mu4e how to sync email
+  (setq mu4e-get-mail-command "/usr/local/bin/mbsync -a")
+  ; tell mu4e to use w3m for html rendering
+  (setq mu4e-html2text-command "/usr/local/bin/w3m -T text/html")
+  
+  ; taken from mu4e page to define bookmarks
+  (add-to-list 'mu4e-bookmarks
+              '("size:5M..500M"       "Big messages"     ?b))
+  
+  ; mu4e requires to specify drafts, sent, and trash dirs
+  ; a smarter configuration allows to select directories according to the account (see mu4e page)
+  ; (setq mu4e-drafts-folder "/work/drafts")
+  ; (setq mu4e-sent-folder "/work/sent")
+  ; (setq mu4e-trash-folder "/work/trash")
+  
+  (setq
+    mu4e-sent-folder   "/gmail/sent"       ;; folder for sent messages
+    mu4e-drafts-folder "/gmail/drafts"     ;; unfinished messages
+    mu4e-trash-folder  "/gmail/trash"      ;; trashed messages
+    mu4e-refile-folder "/gmail/archive")   ;; saved messages
+  
+  ; use msmtp
+  (setq message-send-mail-function 'message-send-mail-with-sendmail)
+  (setq sendmail-program "/usr/local/bin/msmtp")
+  ; tell msmtp to choose the SMTP server according to the from field in the outgoing email
+  (setq message-sendmail-extra-arguments '("--read-envelope-from"))
+  (setq message-sendmail-f-is-evil 't)
+#+END_SRC
+
+* Auto-complete
+
+#+BEGIN_SRC emacs-lisp
+  ;; (require 'auto-complete-config)
+  ;; (add-to-list 'ac-dictionary-directories
+  ;;	     "~/.emacs.d/.cask/24.4.1/elpa/auto-complete-20150322.813/dict")
+  ;; (ac-config-default)
+  ;;(setq ac-ignore-case nil)
+  
+  (global-company-mode t)
+  ;; (add-hook 'after-init-hook 'global-company-mode)
+  
+  (setq company-tooltip-limit 12)                      ; bigger popup window
+  (setq company-idle-delay .1)                         ; decrease delay before autocompletion popup shows
+  (setq company-echo-delay 0)                          ; remove annoying blinking
+  (setq company-begin-commands '(self-insert-command)) ; start autocompletion only after typing
+  (setq company-dabbrev-downcase nil)                  ; Do not convert to lowercase
+  (setq company-selection-wrap-around t)               ; continue from top when reaching bottom
+  
+  (require 'helm-config)
+#+END_SRC
+
+
+* Auto Save all buffers on Focus loss (Gnu Emacs >= 24.4)
+  
+#+BEGIN_SRC emacs-lisp
+  (defun save-all ()
+    (interactive)
+    (save-some-buffers t))
+  
+  (add-hook 'focus-out-hook 'save-all)
+#+END_SRC
+  
+* User interface
+
+** Theme and font
+
+#+BEGIN_SRC emacs-lisp
+  (load-theme 'railscasts t nil)
+  (set-frame-font "Menlo-12")
+#+END_SRC
+
+** Disable Scrollbar and toolbar
+
+#+BEGIN_SRC emacs-lisp
+  (toggle-scroll-bar -1)
+  (tool-bar-mode -1)
+#+END_SRC
+  
+** Window navigation
+  
+Navigate between windows using Alt-1, Alt-2, Shift-left, shift-up, shift-right
+
+Also use M-o to switch to the next window
+
+#+BEGIN_SRC emacs-lisp
+  (windmove-default-keybindings)
+  (global-set-key (kbd "M-o") 'other-window)
+#+END_SRC
+
+** Switching between window configurations
+
+You can use C-c left or C-c right to switch to the prev or next window configuration.
+This is very useful when you want to focus on one single buffer but want to go back
+to your old more complex window configuration.
+
+#+BEGIN_SRC emacs-lisp
+  (winner-mode t)
+#+END_SRC
+
+** Copy & paste from clipboard
+
+#+BEGIN_SRC emacs-lisp
+  (setq x-select-enable-clipboard t)
+#+END_SRC
+  
+** Line numbers
+
+#+BEGIN_SRC emacs-lisp
+  (global-linum-mode t)
+  ;; (setq-default truncate-lines t)
+#+END_SRC
+
+** Powerline
+
+Use Pownerline with it's default theme
+
+#+BEGIN_SRC emacs-lisp
+  (require 'powerline)
+  (powerline-default-theme)
+#+END_SRC
