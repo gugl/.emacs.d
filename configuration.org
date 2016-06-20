@@ -29,6 +29,14 @@ I use =cask= and =pallet= for managing packages.
   (package-initialize)
 #+END_SRC
 
+* Utility functions
+A bunch of handy utility functions. 
+#+BEGIN_SRC emacs-lisp
+  (defun gugl/mac? ()
+    "Returns `t' if this is an Apple machine, nil otherwise."
+    (eq system-type 'darwin))
+#+END_SRC
+
 * Mac OS X
 
 ** keyboard mapping
@@ -51,7 +59,6 @@ Copy shell env variables to the emacs environment (fixes some issues with Emacs.
       (exec-path-from-shell-initialize))
 #+END_SRC
 
-  
 * Highlight Symbol under point
   
 #+BEGIN_SRC emacs-lisp
@@ -63,7 +70,6 @@ Copy shell env variables to the emacs environment (fixes some issues with Emacs.
 #+END_SRC
 
 
-  
 * Neotree
 
 #+BEGIN_SRC emacs-lisp
@@ -78,7 +84,6 @@ Copy shell env variables to the emacs environment (fixes some issues with Emacs.
   (setq projectile-switch-project-action 'neotree-projectile-action)
 #+END_SRC
   
-
 * Programming
 ** Git and Gitflow
 C-f in magit status buffer will invoke the gitflow popup.
@@ -317,7 +322,6 @@ Set the default tab size to 2
   ;;        ad-do-it))
 #+END_SRC
 
-
 * Org Mode
 
 #+BEGIN_SRC emacs-lisp
@@ -426,7 +430,6 @@ Set the default tab size to 2
   (require 'helm-config)
 #+END_SRC
 
-
 * Auto Save all buffers on Focus loss (Gnu Emacs >= 24.4)
   
 #+BEGIN_SRC emacs-lisp
@@ -443,7 +446,53 @@ Set the default tab size to 2
 
 #+BEGIN_SRC emacs-lisp
   (load-theme 'railscasts t nil)
-  (set-frame-font "Menlo-12")
+  ;; (set-frame-font "Menlo-12")
+  (set-frame-font "Inconsolata-18")
+#+END_SRC
+
+** Set default font and configure font resizing
+The standard text-scale- functions just resize the text in the current buffer; 
+I’d generally like to resize the text in every buffer, and I usually want to change 
+the size of the modeline, too (this is especially helpful when presenting).
+These functions and bindings let me resize everything all together!
+
+#+BEGIN_SRC emacs-lisp
+  (setq gugl/default-font "Inconsolata")
+  (setq gugl/default-font-size 18)
+  (setq gugl/current-font-size gugl/default-font-size)
+  (setq gugl/font-change-increment 1.1)
+
+  (defun gugl/set-font-size ()
+    "Set the font to `gugl/default-font' at `gugl/current-font-size'."
+    (set-frame-font
+     (concat gugl/default-font "-" (number-to-string gugl/current-font-size))))
+  
+  (defun gugl/reset-font-size ()
+    "Change font size back to `gugl/default-font-size'."
+    (interactive)
+    (setq gugl/current-font-size gugl/default-font-size)
+    (gugl/set-font-size))
+  
+  (defun gugl/increase-font-size ()
+    "Increase current font size by a factor of `gugl/font-change-increment'."
+    (interactive)
+    (setq gugl/current-font-size
+          (ceiling (* gugl/current-font-size gugl/font-change-increment)))
+    (gugl/set-font-size))
+  
+  (defun gugl/decrease-font-size ()
+    "Decrease current font size by a factor of `gugl/font-change-increment', down to a minimum size of 1."
+    (interactive)
+    (setq gugl/current-font-size
+          (max 1
+               (floor (/ gugl/current-font-size gugl/font-change-increment))))
+    (gugl/set-font-size))
+  
+  (define-key global-map (kbd "C-)") 'gugl/reset-font-size)
+  (define-key global-map (kbd "C-+") 'gugl/increase-font-size)
+  (define-key global-map (kbd "C-=") 'gugl/increase-font-size)
+  (define-key global-map (kbd "C-_") 'gugl/decrease-font-size)
+  (define-key global-map (kbd "C--") 'gugl/decrease-font-size)
 #+END_SRC
 
 ** Disable Scrollbar and toolbar
