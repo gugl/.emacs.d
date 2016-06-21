@@ -69,7 +69,6 @@ Copy shell env variables to the emacs environment (fixes some issues with Emacs.
   (global-set-key [(meta f3)] 'highlight-symbol-query-replace)
 #+END_SRC
 
-
 * Neotree
 
 #+BEGIN_SRC emacs-lisp
@@ -79,8 +78,11 @@ Copy shell env variables to the emacs environment (fixes some issues with Emacs.
   (global-set-key [f8] 'neotree-toggle)
   
   (setq neo-smart-open nil)
-  
-  ;; When running ‘projectile-switch-project’ (C-c p p), ‘neotree’ will change root automatically.
+#+END_SRC
+
+When running ‘projectile-switch-project’ (C-c p p), ‘neotree’ will change root automatically.
+
+#+BEGIN_SRC emacs-lisp
   (setq projectile-switch-project-action 'neotree-projectile-action)
 #+END_SRC
   
@@ -89,12 +91,19 @@ Copy shell env variables to the emacs environment (fixes some issues with Emacs.
 C-f in magit status buffer will invoke the gitflow popup.
 
 #+BEGIN_SRC emacs-lisp
-  ;; (require 'git-gutter)
-  ;; (global-git-gutter-mode t)
-  ;; (git-gutter:linum-setup)
-  
   (require 'magit-gitflow)
   (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)
+#+END_SRC
+
+=C-x g= will open up =magit-status=
+
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-x g") 'magit-status)
+#+END_SRC
+
+Refresh the diff-hl margin when magit does a refresh.
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
 #+END_SRC
 
 ** YaSnippets
@@ -122,12 +131,8 @@ C-f in magit status buffer will invoke the gitflow popup.
   
 #+BEGIN_SRC emacs-lisp
   (require 'smartparens-config)
-  (require 'smartparens-ruby)
   (smartparens-global-mode)
   (show-smartparens-global-mode t)
-  (sp-with-modes '(rhtml-mode)
-    (sp-local-pair "<" ">")
-    (sp-local-pair "<%" "%>"))
 #+END_SRC
 
 ** Projectile
@@ -162,17 +167,37 @@ C-f in magit status buffer will invoke the gitflow popup.
 #+END_SRC
   
 ** Tab size
-Set the default tab size to 2
+
+You can read about indentation basics [[https://www.emacswiki.org/emacs/IndentationBasics][here in the emacs wiki]].
+
+Never use tabs.
 
 #+BEGIN_SRC emacs-lisp
   (setq-default indent-tabs-mode nil)
+#+END_SRC
+
+Set the default tab size to 2.
+
+#+BEGIN_SRC emacs-lisp
   (setq-default tab-width 2)
+#+END_SRC
+
+Use the default tab width for c based languages.
+
+#+BEGIN_SRC emacs-lisp
   (defvaralias 'c-basic-offset 'tab-with)
 #+END_SRC
-  
-
 
 ** Ruby
+
+Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configuration for Ruby based modes and add two extra pairs to the rhtml mode.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'smartparens-ruby)
+  (sp-with-modes '(rhtml-mode)
+    (sp-local-pair "<" ">")
+    (sp-local-pair "<%" "%>"))
+#+END_SRC
 
 #+BEGIN_SRC emacs-lisp
   (setq enh-ruby-program "/usr/local/opt/rbenv/shims/ruby")
@@ -323,42 +348,79 @@ Set the default tab size to 2
 #+END_SRC
 
 * Org Mode
+** Display preferences
+
+I like seeing a little downward-pointing arrow instead of the usual ellipsis (...) that org displays when there’s stuff under a header.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-ellipsis "⤵")
+#+END_SRC
+
+Use syntax highlighting in source blocks while editing.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-src-fontify-natively t)
+#+END_SRC
+
+Make TAB act as if it were issued in a buffer of the language’s major mode.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-src-tab-acts-natively t)
+#+END_SRC
+
+When editing a code snippet, use the current window rather than popping open a new one (which shows the same information).
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-src-window-setup 'current-window)
+#+END_SRC
 
 #+BEGIN_SRC emacs-lisp
   (setq org-directory "~/org")
+
+  (defun org-file-path (filename)
+    "Return the absolute address of an org file, given its relative name."
+    (concat (file-name-as-directory org-directory) filename))
+
+  (setq org-journal-dir "~/org/journal/")
+
   (setq org-default-notes-file (concat org-directory "/gtd.org"))
   (setq org-agenda-files (quote ("~/org")))
   (setq org-refile-targets '((org-agenda-files :level . 1)))
+
   ;; (define-key global-map "\C-cc" 'org-capture)
-  
   (global-set-key "\C-cl" 'org-store-link)
   (global-set-key "\C-cc" 'org-capture)
   (global-set-key "\C-ca" 'org-agenda)
   (global-set-key "\C-cb" 'org-iswitchb)
-  
+
   (setq org-log-done 'time)
-  
+
   (setq org-capture-templates
         '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
            "* TODO %?\n  %i")
+
           ("T" "Todo with store-link" entry (file+headline "~/org/gtd.org" "Tasks")
            "* TODO %?\n  %i\n  %a")
+
           ("j" "Journal" entry (file+datetree "~/org/journal.org")
            "\n* %?\nEntered on %U\n  %i")
-  
-  
+          
+          ("b" "Blog idea" entry (file (org-file-path "blog-ideas.org"))
+           "* TODO %?\n")
+          
+          ("g" "Groceries" checkitem (file (org-file-path "groceries.org")))
+
+          ("l" "Today I Learned..." entry (file+datetree (org-file-path "til.org"))
+           "* %?\n")
+
+          ("r" "Reading" checkitem (file (org-file-path "to-read.org")))
+
           ;;("J" "Journal wit org-journal" plain (function org-journal-get-entry-path)
           ;; "** %?")
-  
-  
+
           ;;("J" "Journal with store-link" entry (file+datetree "~/org/journal.org")
           ;; "* %?\nEntered on %U\n  %i\n  %a")
           ))
-  
-  
-  
-  ;; org-journal
-  (setq org-journal-dir "~/org/journal/")
 #+END_SRC
 
 * Email
@@ -430,8 +492,7 @@ Set the default tab size to 2
   (require 'helm-config)
 #+END_SRC
 
-* Auto Save all buffers on Focus loss (Gnu Emacs >= 24.4)
-  
+* Auto Save all buffers on Focus loss
 #+BEGIN_SRC emacs-lisp
   (defun save-all ()
     (interactive)
@@ -440,14 +501,51 @@ Set the default tab size to 2
   (add-hook 'focus-out-hook 'save-all)
 #+END_SRC
   
+* Engine mode
+Enable =engine-mode= and define a few useful engines.
+The default keymap prefix for them is =C-c /=.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'engine-mode)
+
+  (defengine duckduckgo
+    "https://duckduckgo.com/?q=%s"
+    :keybinding "d")
+
+  (defengine github
+    "https://github.com/search?ref=simplesearch&q=%s"
+    :keybinding "g")
+
+  (defengine google
+    "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s")
+
+  (defengine rfcs
+    "http://pretty-rfc.herokuapp.com/search?q=%s")
+
+  (defengine stack-overflow
+    "https://stackoverflow.com/search?q=%s"
+    :keybinding "s")
+
+  (defengine wikipedia
+    "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
+    :keybinding "w")
+
+  (defengine wiktionary
+    "https://www.wikipedia.org/search-redirect.php?family=wiktionary&language=en&go=Go&search=%s")
+
+  (engine-mode t)
+#+END_SRC
 * UI preferences
 
 ** Theme and font
 
+At the moment I try the =Inconsolata= font.
+You can download it [[https://www.fontsquirrel.com/fonts/Inconsolata][here from Font Squirrel]].
+
 #+BEGIN_SRC emacs-lisp
   (load-theme 'railscasts t nil)
   ;; (set-frame-font "Menlo-12")
-  (set-frame-font "Inconsolata-18")
+  (set-frame-font "Inconsolata-14")
 #+END_SRC
 
 ** Set default font and configure font resizing
@@ -458,7 +556,7 @@ These functions and bindings let me resize everything all together!
 
 #+BEGIN_SRC emacs-lisp
   (setq gugl/default-font "Inconsolata")
-  (setq gugl/default-font-size 18)
+  (setq gugl/default-font-size 14)
   (setq gugl/current-font-size gugl/default-font-size)
   (setq gugl/font-change-increment 1.1)
 
@@ -568,17 +666,13 @@ to your old more complex window configuration.
   (winner-mode t)
 #+END_SRC
 
-** Copy & paste from clipboard
-
-#+BEGIN_SRC emacs-lisp
-  (setq x-select-enable-clipboard t)
-#+END_SRC
-  
 ** Line numbers
 
+Set this to =t= if you want to show line numbers everywhere.
+The default setting is =nil=.
+
 #+BEGIN_SRC emacs-lisp
-  (global-linum-mode t)
-  ;; (setq-default truncate-lines t)
+  (global-linum-mode nil)
 #+END_SRC
 
 ** Powerline
