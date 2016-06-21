@@ -660,15 +660,6 @@ to your old more complex window configuration.
   (winner-mode t)
 #+END_SRC
 
-** Line numbers
-
-Set this to =t= if you want to show line numbers everywhere.
-The default setting is =nil=.
-
-#+BEGIN_SRC emacs-lisp
-  (global-linum-mode nil)
-#+END_SRC
-
 ** Powerline
 
 Use Pownerline with it's default theme
