@@ -417,6 +417,16 @@ When editing a code snippet, use the current window rather than popping open a n
           ))
 #+END_SRC
 
+Make windmove work in org-mode where it does not have special org-mode meaning.
+See the discussion [[http://orgmode.org/manual/Conflicts.html][here]] to read the full story.
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'org-shiftup-final-hook 'windmove-up)
+  (add-hook 'org-shiftleft-final-hook 'windmove-left)
+  (add-hook 'org-shiftdown-final-hook 'windmove-down)
+  (add-hook 'org-shiftright-final-hook 'windmove-right)
+#+END_SRC
+
 * Email
 #+BEGIN_SRC emacs-lisp
   ;; Also look at the following files
