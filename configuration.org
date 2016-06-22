@@ -381,7 +381,6 @@ When editing a code snippet, use the current window rather than popping open a n
   (setq org-agenda-files (quote ("~/org")))
   (setq org-refile-targets '((org-agenda-files :level . 1)))
 
-  ;; (define-key global-map "\C-cc" 'org-capture)
   (global-set-key "\C-cl" 'org-store-link)
   (global-set-key "\C-cc" 'org-capture)
   (global-set-key "\C-ca" 'org-agenda)
@@ -672,7 +671,7 @@ to your old more complex window configuration.
 
 ** Powerline
 
-Use Pownerline with it's default theme
+Use Powerline with it's default theme
 
 #+BEGIN_SRC emacs-lisp
   (require 'powerline)
