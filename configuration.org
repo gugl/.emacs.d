@@ -194,27 +194,12 @@ Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configurati
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-  (setq enh-ruby-program "/usr/local/opt/rbenv/shims/ruby")
   (add-hook 'ruby-mode-hook 'robe-mode)
-  (add-hook 'enh-ruby-mode-hook 'robe-mode)
   
   ;; Setting rbenv path
-  (setq rbenv-installation-dir "/usr/local/opt/rbenv")
-  (require 'rbenv)
-  (global-rbenv-mode)
-  
-  (autoload 'enh-ruby-mode "enh-ruby-mode" "Major mode for ruby files" t)
-  (add-to-list 'auto-mode-alist '("\\.rb$" . enh-ruby-mode))
-  (add-to-list 'auto-mode-alist '("\\.rake$" . enh-ruby-mode))
-  (add-to-list 'auto-mode-alist '("Rakefile$" . enh-ruby-mode))
-  (add-to-list 'auto-mode-alist '("\\.gemspec$" . enh-ruby-mode))
-  (add-to-list 'auto-mode-alist '("\\.ru$" . enh-ruby-mode))
-  (add-to-list 'auto-mode-alist '("Gemfile$" . enh-ruby-mode))
-   
-  (add-to-list 'interpreter-mode-alist '("ruby" . enh-ruby-mode))
-   
-  (setq enh-ruby-bounce-deep-indent t)
-  (setq enh-ruby-hanging-brace-indent-level 2)
+;  (setq rbenv-installation-dir "/usr/local/opt/rbenv")
+;  (require 'rbenv)
+;  (global-rbenv-mode)
    
   (require 'cl) ; If you don't have it already
    
@@ -230,7 +215,7 @@ Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configurati
        if (equal d root)
        return nil)))
    
-  (require 'compile)
+; (require 'compile)
   
   (setq compilation-scroll-output "first-error")
   
@@ -255,17 +240,9 @@ Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configurati
                      (line-number-at-pos)
                      ) t))
    
-  (add-hook 'enh-ruby-mode-hook
-            (lambda ()
-              (local-set-key (kbd "C-s-r") 'rspec-compile-on-line)
-              (local-set-key (kbd "C-c r") 'rspec-compile-on-line)
-              (local-set-key (kbd "s-r") 'rspec-compile-file)
-              ))
-  
   (add-hook 'projectile-mode-hook 'projectile-rails-on)
   
   ; (define-key projectile-rails-mode-map (kbd "s-RET") 'projectile-rails-goto-file-at-point)
-  
 #+END_SRC
 
 ** Elixir
@@ -279,36 +256,35 @@ Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configurati
   ;; use web-mode for .jsx files
   (add-to-list 'auto-mode-alist '("\\.jsx$" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.js$" . web-mode))
-  
+
   ;; http://www.flycheck.org/manual/latest/index.html
   (require 'flycheck)
-  
-  ;; turn on flychecking globally
-  (add-hook 'after-init-hook 'global-flycheck-mode)
-  
+
+  (add-hook 'web-mode-hook 'flycheck-mode)
+
   ;; disable jshint since we prefer eslint checking
   (setq-default flycheck-disabled-checkers
     (append flycheck-disabled-checkers
       '(javascript-jshint)))
-  
+
   ;; use eslint with web-mode for jsx files
   (flycheck-add-mode 'javascript-eslint 'web-mode)
-  
+
   ;; customize flycheck temp file prefix
   (setq-default flycheck-temp-prefix ".flycheck")
-  
+
   ;; disable json-jsonlist checking for json files
   (setq-default flycheck-disabled-checkers
     (append flycheck-disabled-checkers
       '(json-jsonlist)))
-  
+
   ;; https://github.com/purcell/exec-path-from-shell
   ;; only need exec-path-from-shell on OSX
   ;; this hopefully sets up path and other vars better
   ;; (when (memq window-system '(mac ns))
   ;;   (exec-path-from-shell-initialize))
-  
-  
+
+
   (defun my-setup-indent (n)
     ;; java/c/c++
     (setq c-basic-offset n)
@@ -322,16 +298,16 @@ Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configurati
     (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
     (setq css-indent-offset n) ; css-mode
     )
-  
+
   ;; adjust indents for web-mode to 2 spaces
   (defun my-web-mode-hook ()
     "Hooks for Web mode. Adjust indents"
       ;;; http://web-mode.org/
       (my-setup-indent 2))
   (add-hook 'web-mode-hook  'my-web-mode-hook)
-  
+
   (my-setup-indent 2)
-  
+
   ;; for better jsx syntax-highlighting in web-mode
   ;; - courtesy of Patrick @halbtuerke
   ;; (defadvice web-mode-highlight-part (around tweak-jsx activate)
@@ -376,8 +352,7 @@ When editing a code snippet, use the current window rather than popping open a n
     (concat (file-name-as-directory org-directory) filename))
 
   (setq org-journal-dir "~/org/journal/")
-
-  (setq org-default-notes-file (concat org-directory "/gtd.org"))
+  (setq org-completion-use-ido t)
   (setq org-agenda-files (quote ("~/org")))
   (setq org-refile-targets '((org-agenda-files :level . 1)))
 
@@ -387,10 +362,22 @@ When editing a code snippet, use the current window rather than popping open a n
   (global-set-key "\C-cb" 'org-iswitchb)
 
   (setq org-log-done 'time)
+#+END_SRC
 
+My weeks begin on Monday
+#+BEGIN_SRC emacs-lisp
+  (setq calendar-week-start-day 1)
+#+END_SRC
+
+** GTD
+
+The setup here is inspired by Charles Cave and [[http://members.optusnet.com.au/~charles57/GTD/gtd_workflow.html][his GTD workflow]] but using the newer and now recommended org-capture instead of remember-mode.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-default-notes-file (concat org-directory "/gtd.org"))
   (setq org-capture-templates
         '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
-           "* TODO %?\n  %i")
+           "* TODO %^{Summary (begin with action verb)} %^g\n%?\n  %i\nAdded: %U")
 
           ("T" "Todo with store-link" entry (file+headline "~/org/gtd.org" "Tasks")
            "* TODO %?\n  %i\n  %a")
@@ -548,7 +535,7 @@ You can download it [[https://www.fontsquirrel.com/fonts/Inconsolata][here from 
 #+BEGIN_SRC emacs-lisp
   (load-theme 'railscasts t nil)
   ;; (set-frame-font "Menlo-12")
-  (set-frame-font "Inconsolata-14")
+  (set-frame-font "Inconsolata-16")
 #+END_SRC
 
 ** Set default font and configure font resizing
@@ -559,7 +546,7 @@ These functions and bindings let me resize everything all together!
 
 #+BEGIN_SRC emacs-lisp
   (setq gugl/default-font "Inconsolata")
-  (setq gugl/default-font-size 14)
+  (setq gugl/default-font-size 16)
   (setq gugl/current-font-size gugl/default-font-size)
   (setq gugl/font-change-increment 1.1)
 
