@@ -14,6 +14,10 @@
 
 I use =cask= and =pallet= for managing packages.
 
+In order to install cask and pallet follow the =Installation= section on https://github.com/rdallasgray/pallet.
+As mentioned in the documentation you have to change the path to your =cask.el= file as it depends on the way
+you installed cask.
+
 #+BEGIN_SRC emacs-lisp
   ;; (require 'cask "~/.cask/cask.el")
   (require 'cask "~/.emacs.d/.cask/24.5.1/elpa/cask-20151123.528/cask.el")
