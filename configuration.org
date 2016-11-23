@@ -38,7 +38,6 @@ A bunch of handy utility functions.
 #+END_SRC
 
 * Mac OS X
-
 ** keyboard mapping
 
 I use all option keys and the right command key as meta.
@@ -256,6 +255,7 @@ Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configurati
   ;; use web-mode for .jsx files
   (add-to-list 'auto-mode-alist '("\\.jsx$" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.js$" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.cjsx$" . web-mode))
 
   ;; http://www.flycheck.org/manual/latest/index.html
   (require 'flycheck)
@@ -277,6 +277,13 @@ Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configurati
   (setq-default flycheck-disabled-checkers
     (append flycheck-disabled-checkers
       '(json-jsonlist)))
+
+  (add-hook 'web-mode-hook
+      (lambda ()
+        ;; short circuit js mode and just do everything in jsx-mode
+        (if (equal web-mode-content-type "javascript")
+            (web-mode-set-content-type "jsx")
+          (message "now set to: %s" web-mode-content-type))))
 
   ;; https://github.com/purcell/exec-path-from-shell
   ;; only need exec-path-from-shell on OSX
@@ -315,6 +322,13 @@ Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configurati
   ;;      (let ((web-mode-enable-part-face nil))
   ;;        ad-do-it)
   ;;        ad-do-it))
+#+END_SRC
+
+** Marionette.js
+Use web-mode for Marionette.js template files.
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.jst.eco$" . web-mode))
 #+END_SRC
 
 * Org Mode
@@ -373,6 +387,8 @@ My weeks begin on Monday
 
 The setup here is inspired by Charles Cave and [[http://members.optusnet.com.au/~charles57/GTD/gtd_workflow.html][his GTD workflow]] but using the newer and now recommended org-capture instead of remember-mode.
 
+Use =C-c C-x C-c= to switch from the agenda to the column view. This gives you a better overview of your day and an easy interface to estimate your tasks.
+
 #+BEGIN_SRC emacs-lisp
   (setq org-default-notes-file (concat org-directory "/gtd.org"))
   (setq org-capture-templates
@@ -411,6 +427,13 @@ See the discussion [[http://orgmode.org/manual/Conflicts.html][here]] to read th
   (add-hook 'org-shiftleft-final-hook 'windmove-left)
   (add-hook 'org-shiftdown-final-hook 'windmove-down)
   (add-hook 'org-shiftright-final-hook 'windmove-right)
+#+END_SRC
+
+Use the fast selection window to set a task to a new state.
+Use =C-c C-t= to set a new state.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-use-fast-todo-selection t)
 #+END_SRC
 
 * Email
@@ -526,7 +549,6 @@ The default keymap prefix for them is =C-c /=.
   (engine-mode t)
 #+END_SRC
 * UI preferences
-
 ** Theme and font
 
 At the moment I try the =Inconsolata= font.
@@ -534,8 +556,8 @@ You can download it [[https://www.fontsquirrel.com/fonts/Inconsolata][here from 
 
 #+BEGIN_SRC emacs-lisp
   (load-theme 'railscasts t nil)
-  ;; (set-frame-font "Menlo-12")
-  (set-frame-font "Inconsolata-16")
+  (set-frame-font "Menlo-16")
+  ;; (set-frame-font "Inconsolata-16")
 #+END_SRC
 
 ** Set default font and configure font resizing
@@ -546,6 +568,7 @@ These functions and bindings let me resize everything all together!
 
 #+BEGIN_SRC emacs-lisp
   (setq gugl/default-font "Inconsolata")
+  (setq gugl/default-font "Menlo")
   (setq gugl/default-font-size 16)
   (setq gugl/current-font-size gugl/default-font-size)
   (setq gugl/font-change-increment 1.1)
