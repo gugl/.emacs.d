@@ -12,15 +12,20 @@
 
 * Package management
 
-I use =cask= and =pallet= for managing packages.
+This configuration uses =cask= and =pallet= for managing packages.
 
+This configuration assumes that you installed cask via homebrew.\\
+If you installed cask via =curl= you might need to change the past to "~/.cask/cask.el".\\
 In order to install cask and pallet follow the =Installation= section on https://github.com/rdallasgray/pallet.
-As mentioned in the documentation you have to change the path to your =cask.el= file as it depends on the way
-you installed cask.
+
+After you installed cask visit your "~/.emacs.d" directory and run =cask install= in it.\\
+Now just start =emacs= and you're all set.\\
+Every package you will install via =package-list= or =package-install= will be automatically added to your Cask file
+as a dependency of your configuration.
 
 #+BEGIN_SRC emacs-lisp
   ;; (require 'cask "~/.cask/cask.el")
-  (require 'cask "~/.emacs.d/.cask/24.5.1/elpa/cask-20151123.528/cask.el")
+  (require 'cask "/usr/local/share/emacs/site-lisp/cask/cask.el")
   (cask-initialize)
   (require 'pallet)
   (pallet-mode t)
