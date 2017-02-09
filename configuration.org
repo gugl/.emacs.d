@@ -36,6 +36,9 @@ as a dependency of your configuration.
   (add-to-list 'package-archives
                '("gnu" . "http://elpa.gnu.org/packages/") t)
   (package-initialize)
+
+  (setq use-package-always-ensure t)
+  (setq use-package-verbose t)
 #+END_SRC
 
 * Utility functions
@@ -44,6 +47,11 @@ A bunch of handy utility functions.
   (defun gugl/mac? ()
     "Returns `t' if this is an Apple machine, nil otherwise."
     (eq system-type 'darwin))
+#+END_SRC
+
+* General Command Aliases
+#+BEGIN_SRC emacs-lisp
+  (defalias 'yes-or-no-p 'y-or-n-p) ; y or n is enough
 #+END_SRC
 
 * Mac OS X
@@ -70,11 +78,11 @@ Copy shell env variables to the emacs environment (fixes some issues with Emacs.
 * Highlight Symbol under point
   
 #+BEGIN_SRC emacs-lisp
-  (require 'highlight-symbol)
-  (global-set-key [(control f3)] 'highlight-symbol)
-  (global-set-key [f3] 'highlight-symbol-next)
-  (global-set-key [(shift f3)] 'highlight-symbol-prev)
-  (global-set-key [(meta f3)] 'highlight-symbol-query-replace)
+  (use-package highlight-symbol
+    :bind (([(control f3)] . highlight-symbol)
+           ([f3]           . highlight-symbol-next)
+           ([(shift f3)]   . highlight-symbol-prev)
+           ([(meta f3)]    . highlight-symbol-query-replace)))
 #+END_SRC
 
 * Neotree
@@ -83,41 +91,95 @@ Copy shell env variables to the emacs environment (fixes some issues with Emacs.
 Use =f8= to open or close it.
 
 #+BEGIN_SRC emacs-lisp
-  (require 'neotree)
-  
-  (global-set-key (kbd "M-\\") 'neotree-toggle)
-  (global-set-key [f8] 'neotree-toggle)
-  
-  (setq neo-smart-open nil)
+  (use-package neotree
+    :bind (("M-\\" . neotree-toggle)
+           ([f8]   . neotree-toggle))
+    :config
+    (setq neo-smart-open nil))
+
+  ;;(require 'neotree)
+
+  ;;(global-set-key (kbd "M-\\") 'neotree-toggle)
+  ;;(global-set-key [f8] 'neotree-toggle)
+
+  ;;(setq neo-smart-open nil)
 #+END_SRC
+
+#+RESULTS:
 
 * Programming
 ** Git and Gitflow
-C-f in magit status buffer will invoke the gitflow popup.
-
-#+BEGIN_SRC emacs-lisp
-  (require 'magit-gitflow)
-  (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)
-#+END_SRC
-
+*** Magit
 =C-x g= will open up =magit-status=
 
 #+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "C-x g") 'magit-status)
+    (use-package magit
+      :bind ("C-x g" . magit-status)
+      :config
+      (defalias 'blame 'magit-blame))
 #+END_SRC
 
+*** Highlight uncommitted changes
+Use the =diff-hl= package to highlight changed-and-uncommitted lines when programming.
 Refresh the diff-hl margin when magit does a refresh.
+
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  (use-package diff-hl
+    :defer 2
+    :config
+    (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+    (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
+    (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode))
+#+END_SRC
+
+C-f in magit status buffer will invoke the gitflow popup.
+
+*** Git Flow
+#+BEGIN_SRC emacs-lisp
+  (use-package magit-gitflow
+    :defer 2
+    :config
+    (add-hook 'magit-mode-hook 'turn-on-magit-gitflow))
+#+END_SRC
+
+*** Git Timemachine
+With Git Timemachine you can walk through the git history of you git-backed file buffer.
+
+Start it with =M-x git-timemachine= then you can use it like this:
+
+|---+----------------------------------------|
+| p | Show previous revision                 |
+| n | Show next revision                     |
+| g | Show nth revision                      |
+| q | Quit                                   |
+| w | Add abbreviated commit sha to killring |
+| W | Add full commit sha to killring        |
+|---+----------------------------------------|
+
+#+BEGIN_SRC emacs-lisp
+  (use-package git-timemachine)
 #+END_SRC
 
 ** YaSnippets
   
 #+BEGIN_SRC emacs-lisp
-  (require 'yasnippet)
-  (yas-global-mode 1)
+  (use-package yasnippet
+    :defer 3
+    :config
+    (yas-global-mode 1))
 #+END_SRC
   
+** Dumb Jump
+
+[[https://github.com/jacktasia/dumb-jump][Dumb Jump]] is an Emacs "jump to definition" package with support for multiple programming languages that favors "just working". This means minimal -- and ideally zero -- configuration with absolutely no stored indexes (TAGS) or persistent background processes. Dumb Jump requires at least GNU Emacs 24.3.
+In order to make it fast, make sure you have [[https://github.com/ggreer/the_silver_searcher][The Silver Searcher]] =ag= installed on your system.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package dumb-jump
+    :defer 2
+    :config
+    (dumb-jump-mode))
+#+END_SRC
 ** js2-refactor
 
 #+BEGIN_SRC emacs-lisp
@@ -135,37 +197,47 @@ Refresh the diff-hl margin when magit does a refresh.
 ** Smartparens
   
 #+BEGIN_SRC emacs-lisp
-  (require 'smartparens-config)
-  (smartparens-global-mode)
-  (show-smartparens-global-mode t)
+  (use-package smartparens
+    :defer 2
+    :config
+    (require 'smartparens-config)
+    (smartparens-global-mode)
+    (show-smartparens-global-mode t))
 #+END_SRC
 
 ** Projectile
-  
-#+BEGIN_SRC emacs-lisp
-  (require 'grizzl)
-  (projectile-global-mode)
-  (setq projectile-enable-caching t)
-  (setq projectile-completion-system 'grizzl)
-  (global-set-key (kbd "C-c f") 'projectile-find-file)
-#+END_SRC
 
-When running ‘projectile-switch-project’ (C-c p p), ‘neotree’ will change root automatically.
+[[https://github.com/grizzl/grizzl][Grizzl]] is used as the completion system for projectile.
+When running ‘projectile-switch-project’ (C-c p p), ‘neotree’ will change root automatically.  
 
 #+BEGIN_SRC emacs-lisp
-  (setq projectile-switch-project-action 'neotree-projectile-action)
+  ;;  (use-package grizzl
+  ;;    :defer 2)
+  (use-package projectile
+    :demand t
+    :bind (("C-c f" . projectile-find-file))
+    :config
+    (projectile-global-mode)
+    (setq projectile-enable-caching t)
+    ;;(setq projectile-completion-system 'grizzl)
+    ;;(setq projectile-completion-system 'ivy)
+    (setq projectile-switch-project-action 'neotree-projectile-action))
 #+END_SRC
+
+#+RESULTS:
 
 ** Cucumber
   
 #+BEGIN_SRC emacs-lisp
-  (require 'feature-mode)
-  (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
-  (add-to-list 'auto-mode-alist '("\\.feature$" . feature--mode))
-  (add-hook 'feature-mode-hook
-            (lambda ()
-              (local-set-key (kbd "M-r") 'feature-verify-scenario-at-pos)
-              ))
+  (use-package feature-mode
+    :mode
+    ("\.feature$" . feature-mode)
+    ("\\.feature$" . feature--mode)
+    :config
+    (add-hook 'feature-mode-hook
+              (lambda ()
+                (local-set-key (kbd "M-r") 'feature-verify-scenario-at-pos)
+                )))
 #+END_SRC
   
 ** Tab size
@@ -345,6 +417,16 @@ Use web-mode for Marionette.js template files.
 #+END_SRC
 
 * Org Mode
+** Source Code Language Support
+#+BEGIN_SRC emacs-lisp :results silent
+  (require 'ob-sh)
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((sh . t)
+     (emacs-lisp . t)
+     ))
+#+END_SRC
+
 ** Display preferences
 
 I like seeing a little downward-pointing arrow instead of the usual ellipsis (...) that org displays when there’s stuff under a header.
@@ -378,10 +460,9 @@ When editing a code snippet, use the current window rather than popping open a n
     "Return the absolute address of an org file, given its relative name."
     (concat (file-name-as-directory org-directory) filename))
 
-  (setq org-journal-dir "~/org/journal/")
   (setq org-completion-use-ido t)
   (setq org-agenda-files (quote ("~/org")))
-  (setq org-refile-targets '((org-agenda-files :level . 1)))
+  (setq org-refile-targets '((org-agenda-files :level . 1)(org-agenda-files :tag . "PROJECT")))
 
   (global-set-key "\C-cl" 'org-store-link)
   (global-set-key "\C-cc" 'org-capture)
@@ -402,34 +483,12 @@ The setup here is inspired by Charles Cave and [[http://members.optusnet.com.au/
 
 Use =C-c C-x C-c= to switch from the agenda to the column view. This gives you a better overview of your day and an easy interface to estimate your tasks.
 
+For privacy reasons I moved my gtd config in the dedicated =gtd.el= file that is not in the public git repository.
+
 #+BEGIN_SRC emacs-lisp
-  (setq org-default-notes-file (concat org-directory "/gtd.org"))
-  (setq org-capture-templates
-        '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
-           "* TODO %^{Summary (begin with action verb)} %^g\n%?\n  %i\nAdded: %U")
-
-          ("T" "Todo with store-link" entry (file+headline "~/org/gtd.org" "Tasks")
-           "* TODO %?\n  %i\n  %a")
-
-          ("j" "Journal" entry (file+datetree "~/org/journal.org")
-           "\n* %?\nEntered on %U\n  %i")
-          
-          ("b" "Blog idea" entry (file (org-file-path "blog-ideas.org"))
-           "* TODO %?\n")
-          
-          ("g" "Groceries" checkitem (file (org-file-path "groceries.org")))
-
-          ("l" "Today I Learned..." entry (file+datetree (org-file-path "til.org"))
-           "* %?\n")
-
-          ("r" "Reading" checkitem (file (org-file-path "to-read.org")))
-
-          ;;("J" "Journal wit org-journal" plain (function org-journal-get-entry-path)
-          ;; "** %?")
-
-          ;;("J" "Journal with store-link" entry (file+datetree "~/org/journal.org")
-          ;; "* %?\nEntered on %U\n  %i\n  %a")
-          ))
+  (let ((file "~/.emacs.d/gtd.el"))
+        (cond ((file-exists-p file)
+               (load-file file))))
 #+END_SRC
 
 Make windmove work in org-mode where it does not have special org-mode meaning.
@@ -449,51 +508,19 @@ Use =C-c C-t= to set a new state.
   (setq org-use-fast-todo-selection t)
 #+END_SRC
 
-* Email
+** Org Journal
 #+BEGIN_SRC emacs-lisp
-  ;; Also look at the following files
-  ;;
-  ;; .mbsyncrc      (sync imap emails)
-  ;; .msmtprc       (send mails)
-  
-  ; add the source shipped with mu to load-path
-  (add-to-list 'load-path (expand-file-name "/usr/local/Cellar/mu/0.9.16/share/emacs/site-lisp/mu/mu4e"))
-  
-  ; make sure emacs finds applications in /usr/local/bin
-  (setq exec-path (cons "/usr/local/bin" exec-path))
-  
-  ; require mu4e
-  (require 'mu4e)
-  
-  ; tell mu4e where my Maildir is
-  (setq mu4e-maildir "~/Maildir")
-  ; tell mu4e how to sync email
-  (setq mu4e-get-mail-command "/usr/local/bin/mbsync -a")
-  ; tell mu4e to use w3m for html rendering
-  (setq mu4e-html2text-command "/usr/local/bin/w3m -T text/html")
-  
-  ; taken from mu4e page to define bookmarks
-  (add-to-list 'mu4e-bookmarks
-              '("size:5M..500M"       "Big messages"     ?b))
-  
-  ; mu4e requires to specify drafts, sent, and trash dirs
-  ; a smarter configuration allows to select directories according to the account (see mu4e page)
-  ; (setq mu4e-drafts-folder "/work/drafts")
-  ; (setq mu4e-sent-folder "/work/sent")
-  ; (setq mu4e-trash-folder "/work/trash")
-  
-  (setq
-    mu4e-sent-folder   "/gmail/sent"       ;; folder for sent messages
-    mu4e-drafts-folder "/gmail/drafts"     ;; unfinished messages
-    mu4e-trash-folder  "/gmail/trash"      ;; trashed messages
-    mu4e-refile-folder "/gmail/archive")   ;; saved messages
-  
-  ; use msmtp
-  (setq message-send-mail-function 'message-send-mail-with-sendmail)
-  (setq sendmail-program "/usr/local/bin/msmtp")
-  ; tell msmtp to choose the SMTP server according to the from field in the outgoing email
-  (setq message-sendmail-extra-arguments '("--read-envelope-from"))
-  (setq message-sendmail-f-is-evil 't)
+  (setq org-journal-dir "~/org/journal/")
+  (global-set-key (kbd "C-c j") 'org-journal-new-entry)
+#+END_SRC
+* Email
+
+For privacy reasons I moved my mail config in the dedicated =mail.el= file that is not in the public git repository.
+
+#+BEGIN_SRC emacs-lisp
+  (let ((file "~/.emacs.d/mail.el"))
+        (cond ((file-exists-p file)
+               (load-file file))))
 #+END_SRC
 
 * Auto-complete
@@ -532,36 +559,37 @@ Enable =engine-mode= and define a few useful engines.
 The default keymap prefix for them is =C-c /=.
 
 #+BEGIN_SRC emacs-lisp
-  (require 'engine-mode)
+  (use-package engine-mode
+    :defer 2
+    :config
+    (defengine duckduckgo
+      "https://duckduckgo.com/?q=%s"
+      :keybinding "d")
 
-  (defengine duckduckgo
-    "https://duckduckgo.com/?q=%s"
-    :keybinding "d")
+    (defengine github
+      "https://github.com/search?ref=simplesearch&q=%s"
+      :keybinding "g")
 
-  (defengine github
-    "https://github.com/search?ref=simplesearch&q=%s"
-    :keybinding "g")
+    (defengine google
+      "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s")
 
-  (defengine google
-    "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s")
+    (defengine rfcs
+      "http://pretty-rfc.herokuapp.com/search?q=%s")
 
-  (defengine rfcs
-    "http://pretty-rfc.herokuapp.com/search?q=%s")
+    (defengine stack-overflow
+      "https://stackoverflow.com/search?q=%s"
+      :keybinding "s")
 
-  (defengine stack-overflow
-    "https://stackoverflow.com/search?q=%s"
-    :keybinding "s")
+    (defengine wikipedia
+      "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
+      :keybinding "w")
 
-  (defengine wikipedia
-    "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
-    :keybinding "w")
+    (defengine wiktionary
+      "https://www.wikipedia.org/search-redirect.php?family=wiktionary&language=en&go=Go&search=%s")
 
-  (defengine wiktionary
-    "https://www.wikipedia.org/search-redirect.php?family=wiktionary&language=en&go=Go&search=%s")
-
-  (engine-mode t)
+    (engine-mode t))
 #+END_SRC
-* UI preferences
+* General & UI preferences
 ** Theme and font
 
 At the moment I try the =Inconsolata= font.
@@ -661,16 +689,6 @@ This either hides or “renames” a variety of major or minor modes using the =
   (tool-bar-mode -1)
 #+END_SRC
   
-** Highlight uncommitted changes
-Use the =diff-hl= package to highlight changed-and-uncommitted lines when programming.
-
-#+BEGIN_SRC emacs-lisp
-  (require 'diff-hl)
-
-  (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
-  (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode)
-#+END_SRC
-
 ** Window navigation
   
 Navigate between windows using Alt-1, Alt-2, Shift-left, shift-up, shift-right
@@ -680,6 +698,16 @@ Also use M-o to switch to the next window
 #+BEGIN_SRC emacs-lisp
   (windmove-default-keybindings)
   (global-set-key (kbd "M-o") 'other-window)
+#+END_SRC
+
+** Window splitting
+*** split-height-threshold fix for rgrep or org-agenda with neotree
+
+Reducing the split-height-threshold to 30 lines in order to fix the issue
+that created a new frame when using =rgrep= or =org-agenda= while neotree is open.
+
+#+BEGIN_SRC emacs-lisp
+  (setq split-height-threshold 40)
 #+END_SRC
 
 ** Switching between window configurations
@@ -699,4 +727,103 @@ Use Powerline with it's default theme
 #+BEGIN_SRC emacs-lisp
   (require 'powerline)
   (powerline-default-theme)
+#+END_SRC
+** Guide Key
+
+[[https://github.com/kai2nenobu/guide-key][Guide Key]] displays the available key bindings automatically and dynamically.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'guide-key)
+  (setq guide-key/guide-key-sequence t)
+  (guide-key-mode 1)
+#+END_SRC
+
+** Better completion wity ivy, swiper and counsel
+*** Ivy
+Better replacement for ~ido-mode~ as the completion system.
+For more information see http://oremacs.com/2015/04/16/ivy-mode/
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy
+    :defer 2
+    :diminish t
+    :config
+    (ivy-mode 1))
+#+END_SRC
+
+*** Counsel
+~ivy-mode~ ensures that any Emacs command using ~completing-read-function~ uses ivy for completion.
+
+Counsel takes this further, providing versions of common Emacs commands that are customised to make the best use of ivy.
+For example, ~counsel-find-file~ has some additional keybindings. Pressing ~DEL~ will move you to the parent directory.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel
+    :defer 2
+    :bind (("C-x C-f" . counsel-find-file)))
+#+END_SRC
+
+#+RESULTS:
+
+*** Counsel Projectile
+~counsel-projectile~ adds counsel goodness to some projectile commands from projectile-find-file to projectile-ag.
+See the full list at https://github.com/ericdanan/counsel-projectile
+
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel-projectile
+    :defer 2
+    :config
+    (counsel-projectile-on))
+#+END_SRC
+
+*** Counsel OSX App
+With ~counsel-osx-app~ you can start macOS Applications from within emacs using M-x counsel-osx-app.
+https://github.com/d12frosted/counsel-osx-app
+
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel-osx-app
+    :defer 3)
+#+END_SRC
+
+*** Swiper - Better isearch
+Replacement for isearch. It's awesome.
+You can get a really good overview in the minibuffer.
+
+For more information see https://github.com/abo-abo/swiper
+
+#+BEGIN_SRC emacs-lisp
+  (use-package swiper
+    :bind ("C-s" . swiper))
+#+END_SRC
+
+*** Avy - Jump to things in Emacs tree-style
+#+BEGIN_SRC emacs-lisp
+  (use-package avy)
+#+END_SRC
+
+** Shell
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+#+END_SRC
+
+* Dashboard
+1. Displays an awesome Emacs banner!
+2. Recent files
+3. Bookmarks list
+4. Recent projectile projects list
+
+#+BEGIN_SRC emacs-lisp
+  (use-package page-break-lines
+    :config
+    (global-page-break-lines-mode 1))
+
+  (use-package dashboard
+    :config
+    (dashboard-setup-startup-hook)
+    (setq dashboard-banner-logo-title "Welcome to Emacs! What a wonderful day!")
+    (setq dashboard-startup-banner 'official)
+    (setq dashboard-items '((recents  . 5)
+                            (bookmarks . 5)
+                            (projects . 5))))
+
 #+END_SRC

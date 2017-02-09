@@ -8,3 +8,10 @@ elpa/
 
 projectile-bookmarks.eld
 ac-comphist.dat
+/configuration.el
+/games/tetris-scores
+/bookmarks
+/url/cookies
+/.mc-lists.el
+/mail.el
+/gtd.el
