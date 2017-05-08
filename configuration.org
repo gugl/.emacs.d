@@ -25,10 +25,10 @@ as a dependency of your configuration.
 
 #+BEGIN_SRC emacs-lisp
   ;; (require 'cask "~/.cask/cask.el")
-  (require 'cask "/usr/local/share/emacs/site-lisp/cask/cask.el")
-  (cask-initialize)
-  (require 'pallet)
-  (pallet-mode t)
+  ;; (require 'cask "/usr/local/share/emacs/site-lisp/cask/cask.el")
+  ;; (cask-initialize)
+  ;; (require 'pallet)
+  ;; (pallet-mode t)
 
   (require 'package)
   (add-to-list 'package-archives
@@ -71,8 +71,11 @@ I use all option keys and the right command key as meta.
 Copy shell env variables to the emacs environment (fixes some issues with Emacs.app on Mac OS X)
 
 #+BEGIN_SRC emacs-lisp
-  (when (memq window-system '(mac ns))
-      (exec-path-from-shell-initialize))
+  (use-package exec-path-from-shell
+               :config
+               (when (memq window-system '(mac ns))
+                 (exec-path-from-shell-initialize)))
+
 #+END_SRC
 
 * Highlight Symbol under point
@@ -108,6 +111,20 @@ Use =f8= to open or close it.
 #+RESULTS:
 
 * Programming
+** Async
+I think I'm not using it yet but it might be a good idea to have it.
+#+BEGIN_SRC emacs-lisp
+  (use-package async)
+#+END_SRC
+
+** Annotate
+With Annotate you can, oh surprise, annotate your text/code files with notes
+that are stored separated from your files but you can show them when you need them.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package annotate)
+#+END_SRC
+
 ** Git and Gitflow
 *** Magit
 =C-x g= will open up =magit-status=
@@ -265,6 +282,10 @@ Use the default tab width for c based languages.
 Set all indent offsets to the tab size of 2.
 
 #+BEGIN_SRC emacs-lisp
+
+  (use-package web-mode)
+  (use-package coffee-mode)
+
   (defun my-setup-indent (n)
     ;; java/c/c++
     (setq c-basic-offset n)
@@ -298,6 +319,10 @@ Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configurati
   (sp-with-modes '(rhtml-mode)
     (sp-local-pair "<" ">")
     (sp-local-pair "<%" "%>"))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package ruby-end)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -354,44 +379,71 @@ Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configurati
 
 ** Elixir
 
+Taken from https://github.com/elixir-lang/emacs-elixir
+Also, if you use smartparens you can piggyback on some of its functionality for dealing with Ruby's do .. end blocks. A sample configuration would be.
+
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'elixir-mode-hook 'alchemist-mode)
+  (use-package elixir-mode
+    :config
+    (sp-with-modes '(elixir-mode)
+      (sp-local-pair "fn" "end"
+                     :when '(("SPC" "RET"))
+                     :actions '(insert navigate))
+      (sp-local-pair "do" "end"
+                     :when '(("SPC" "RET"))
+                     :post-handlers '(sp-ruby-def-post-handler)
+                     :actions '(insert navigate))))
+#+END_SRC
+
+Alchemist: Elixir Tooling Integration Into Emacs
+
+#+BEGIN_SRC emacs-lisp
+  (setq alchemist-key-command-prefix (kbd "C-c e"))
+
+  (use-package alchemist
+    :config
+    (add-hook 'elixir-mode-hook 'alchemist-mode)
+    (add-to-list 'auto-mode-alist '("\\.eex$" . web-mode))
+    (setq alchemist-hooks-test-on-save t))
 #+END_SRC
 
 ** React
 #+BEGIN_SRC emacs-lisp
+
   ;; use web-mode for .jsx files
   (add-to-list 'auto-mode-alist '("\\.jsx$" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.js$" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.cjsx$" . web-mode))
 
   ;; http://www.flycheck.org/manual/latest/index.html
-  (require 'flycheck)
+  (use-package flycheck
+    :config
+    (add-hook 'web-mode-hook 'flycheck-mode)
 
-  (add-hook 'web-mode-hook 'flycheck-mode)
+    ;; disable jshint since we prefer eslint checking
+    (setq-default flycheck-disabled-checkers
+                  (append flycheck-disabled-checkers
+                          '(javascript-jshint)))
 
-  ;; disable jshint since we prefer eslint checking
-  (setq-default flycheck-disabled-checkers
-    (append flycheck-disabled-checkers
-      '(javascript-jshint)))
+    ;; use eslint with web-mode for jsx files
+    (flycheck-add-mode 'javascript-eslint 'web-mode)
 
-  ;; use eslint with web-mode for jsx files
-  (flycheck-add-mode 'javascript-eslint 'web-mode)
+    ;; customize flycheck temp file prefix
+    (setq-default flycheck-temp-prefix ".flycheck")
 
-  ;; customize flycheck temp file prefix
-  (setq-default flycheck-temp-prefix ".flycheck")
+    ;; disable json-jsonlist checking for json files
+    (setq-default flycheck-disabled-checkers
+                  (append flycheck-disabled-checkers
+                          '(json-jsonlist)))
+    )
 
-  ;; disable json-jsonlist checking for json files
-  (setq-default flycheck-disabled-checkers
-    (append flycheck-disabled-checkers
-      '(json-jsonlist)))
 
   (add-hook 'web-mode-hook
-      (lambda ()
-        ;; short circuit js mode and just do everything in jsx-mode
-        (if (equal web-mode-content-type "javascript")
-            (web-mode-set-content-type "jsx")
-          (message "now set to: %s" web-mode-content-type))))
+            (lambda ()
+              ;; short circuit js mode and just do everything in jsx-mode
+              (if (equal web-mode-content-type "javascript")
+                  (web-mode-set-content-type "jsx")
+                (message "now set to: %s" web-mode-content-type))))
 
   ;; https://github.com/purcell/exec-path-from-shell
   ;; only need exec-path-from-shell on OSX
@@ -454,22 +506,24 @@ When editing a code snippet, use the current window rather than popping open a n
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-  (setq org-directory "~/org")
+    (setq org-directory "~/org")
 
-  (defun org-file-path (filename)
-    "Return the absolute address of an org file, given its relative name."
-    (concat (file-name-as-directory org-directory) filename))
+    (defun org-file-path (filename)
+      "Return the absolute address of an org file, given its relative name."
+      (concat (file-name-as-directory org-directory) filename))
 
-  (setq org-completion-use-ido t)
-  (setq org-agenda-files (quote ("~/org")))
-  (setq org-refile-targets '((org-agenda-files :level . 1)(org-agenda-files :tag . "PROJECT")))
+    (setq org-completion-use-ido t)
+    (setq org-agenda-files (quote ("~/org")))
+    (setq org-refile-targets '((org-agenda-files :level . 1)(org-agenda-files :tag . "PROJECT")))
 
-  (global-set-key "\C-cl" 'org-store-link)
-  (global-set-key "\C-cc" 'org-capture)
-  (global-set-key "\C-ca" 'org-agenda)
-  (global-set-key "\C-cb" 'org-iswitchb)
+    (global-set-key "\C-cl" 'org-store-link)
+    (global-set-key "\C-cc" 'org-capture)
+    (global-set-key "\C-ca" 'org-agenda)
+    (global-set-key "\C-cb" 'org-iswitchb)
 
-  (setq org-log-done 'time)
+    (defalias 'agenda 'org-agenda)
+
+    (setq org-log-done 'time)
 #+END_SRC
 
 My weeks begin on Monday
@@ -510,9 +564,12 @@ Use =C-c C-t= to set a new state.
 
 ** Org Journal
 #+BEGIN_SRC emacs-lisp
-  (setq org-journal-dir "~/org/journal/")
-  (global-set-key (kbd "C-c j") 'org-journal-new-entry)
+  (use-package org-journal
+    :bind (("C-c j" . org-journal-new-entry))
+    :config
+    (setq org-journal-dir "~/org/journal/"))
 #+END_SRC
+
 * Email
 
 For privacy reasons I moved my mail config in the dedicated =mail.el= file that is not in the public git repository.
@@ -523,26 +580,26 @@ For privacy reasons I moved my mail config in the dedicated =mail.el= file that 
                (load-file file))))
 #+END_SRC
 
-* Auto-complete
+* Completion using Company
 
 #+BEGIN_SRC emacs-lisp
-  ;; (require 'auto-complete-config)
-  ;; (add-to-list 'ac-dictionary-directories
-  ;;	     "~/.emacs.d/.cask/24.4.1/elpa/auto-complete-20150322.813/dict")
-  ;; (ac-config-default)
-  ;;(setq ac-ignore-case nil)
-  
-  (global-company-mode t)
-  ;; (add-hook 'after-init-hook 'global-company-mode)
-  
-  (setq company-tooltip-limit 12)                      ; bigger popup window
-  (setq company-idle-delay .1)                         ; decrease delay before autocompletion popup shows
-  (setq company-echo-delay 0)                          ; remove annoying blinking
-  (setq company-begin-commands '(self-insert-command)) ; start autocompletion only after typing
-  (setq company-dabbrev-downcase nil)                  ; Do not convert to lowercase
-  (setq company-selection-wrap-around t)               ; continue from top when reaching bottom
-  
-  (require 'helm-config)
+  (use-package company
+    :config
+    (global-company-mode t)
+    ;; (add-hook 'after-init-hook 'global-company-mode)
+
+    (setq company-tooltip-limit 12)                      ; bigger popup window
+    (setq company-idle-delay .1)                         ; decrease delay before autocompletion popup shows
+    (setq company-echo-delay 0)                          ; remove annoying blinking
+    (setq company-begin-commands '(self-insert-command)) ; start autocompletion only after typing
+    (setq company-dabbrev-downcase nil)                  ; Do not convert to lowercase
+    (setq company-selection-wrap-around t)               ; continue from top when reaching bottom
+
+    )
+
+  (use-package helm
+    :config
+    (require 'helm-config))
 #+END_SRC
 
 * Auto Save all buffers on Focus loss
@@ -596,8 +653,10 @@ At the moment I try the =Inconsolata= font.
 You can download it [[https://www.fontsquirrel.com/fonts/Inconsolata][here from Font Squirrel]].
 
 #+BEGIN_SRC emacs-lisp
-  (load-theme 'railscasts t nil)
-  (set-frame-font "Menlo-16")
+  (use-package railscasts-theme
+    :config
+    (load-theme 'railscasts t nil)
+    (set-frame-font "Menlo-16"))
   ;; (set-frame-font "Inconsolata-16")
 #+END_SRC
 
@@ -652,6 +711,7 @@ I’d rather have only a few necessary mode identifiers on my modeline.
 This either hides or “renames” a variety of major or minor modes using the =diminish= package.
 
 #+BEGIN_SRC emacs-lisp
+  (use-package diminish)
   (defmacro diminish-minor-mode (filename mode &optional abbrev)
     `(eval-after-load (symbol-name ,filename)
        '(diminish ,mode ,abbrev)))
@@ -725,20 +785,28 @@ to your old more complex window configuration.
 Use Powerline with it's default theme
 
 #+BEGIN_SRC emacs-lisp
-  (require 'powerline)
-  (powerline-default-theme)
+  (use-package powerline
+    :config
+    (powerline-default-theme))
 #+END_SRC
+
 ** Guide Key
 
 [[https://github.com/kai2nenobu/guide-key][Guide Key]] displays the available key bindings automatically and dynamically.
 
 #+BEGIN_SRC emacs-lisp
-  (require 'guide-key)
-  (setq guide-key/guide-key-sequence t)
-  (guide-key-mode 1)
+  (use-package guide-key
+    :config
+    (setq guide-key/guide-key-sequence t)
+    (guide-key-mode 1))
 #+END_SRC
 
 ** Better completion wity ivy, swiper and counsel
+*** Ag
+#+BEGIN_SRC emacs-lisp
+(use-package ag)
+#+END_SRC
+
 *** Ivy
 Better replacement for ~ido-mode~ as the completion system.
 For more information see http://oremacs.com/2015/04/16/ivy-mode/
@@ -770,11 +838,16 @@ For example, ~counsel-find-file~ has some additional keybindings. Pressing ~DEL~
 See the full list at https://github.com/ericdanan/counsel-projectile
 
 #+BEGIN_SRC emacs-lisp
-  (use-package counsel-projectile
-    :defer 2
-    :config
-    (counsel-projectile-on))
+    (use-package counsel-projectile
+      :defer 2
+      :config
+      (counsel-projectile-on)
+      (global-set-key (kbd "M-t") 'counsel-projectile)
+  )
 #+END_SRC
+
+#+RESULTS:
+: t
 
 *** Counsel OSX App
 With ~counsel-osx-app~ you can start macOS Applications from within emacs using M-x counsel-osx-app.
@@ -804,6 +877,15 @@ For more information see https://github.com/abo-abo/swiper
 ** Shell
 #+BEGIN_SRC emacs-lisp
   (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+#+END_SRC
+
+** Smoother Scrolling
+#+BEGIN_SRC emacs-lisp
+  ;; scroll one line at a time (less "jumpy" than defaults)
+  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+  (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+  (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+  (setq scroll-step 1) ;; keyboard scroll one line at a time
 #+END_SRC
 
 * Dashboard
