@@ -444,28 +444,19 @@ Taken from https://github.com/elixir-lang/emacs-elixir
 Also, if you use smartparens you can piggyback on some of its functionality for dealing with Ruby's do .. end blocks. A sample configuration would be.
 
 #+BEGIN_SRC emacs-lisp
-    (use-package elixir-mode
-      :config
-      ;; This was commented out as it depends on the smartparens package used for ruby and I'm trying a different one at the moment
-      ;; (sp-with-modes '(elixir-mode)
-      ;;   (sp-local-pair "fn" "end"
-      ;;                  :when '(("SPC" "RET"))
-      ;;                  :actions '(insert navigate))
-      ;;   (sp-local-pair "do" "end"
-      ;;                  :when '(("SPC" "RET"))
-      ;;                  :post-handlers '(sp-ruby-def-post-handler)
-      ;;                  :actions '(insert navigate)))
-  (setq elixir-format-elixir-path "/usr/local/bin/elixir")
-  (setq elixir-format-mix-path "/usr/local/bin/mix")
+  (use-package elixir-mode
+    :config
+    (setq elixir-format-elixir-path "/usr/local/bin/elixir")
+    (setq elixir-format-mix-path "/usr/local/bin/mix")
 
-  (add-hook 'elixir-mode-hook
-            (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
+    (add-hook 'elixir-mode-hook
+              (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
 
-  (add-hook 'elixir-format-hook (lambda ()
-                                   (if (projectile-project-p)
-                                       (setq elixir-format-arguments (list "--dot-formatter" (concat (projectile-project-root) "/.formatter.exs")))
-                                     (setq elixir-format-arguments nil))))
-      )
+    (add-hook 'elixir-format-hook (lambda ()
+                                    (if (projectile-project-p)
+                                        (setq elixir-format-arguments (list "--dot-formatter" (concat (projectile-project-root) "/.formatter.exs")))
+                                      (setq elixir-format-arguments nil))))
+    )
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -523,16 +514,7 @@ Also, if you use smartparens you can piggyback on some of its functionality for 
   (flycheck-add-next-checker 'elixir-mix 'my-elixir-dialyzer)
 #+END_SRC
 
-#+RESULTS:
-| my-elixir-dialyzer | my-elixir-dialyzer |
-
 #+BEGIN_SRC emacs-lisp
-  ;; (use-package flycheck-credo
-  ;;   :defer t
-  ;;   :init 
-  ;;   (add-hook 'elixir-mode-hook 'flycheck-credo-setup)
-  ;;   :config
-  ;;   (flycheck-credo-setup))
   (use-package flycheck-credo
     :config
     (flycheck-credo-setup)
