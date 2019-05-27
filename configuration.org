@@ -1,4 +1,5 @@
 #+TITLE: Emacs configuration
+#+PROPERTY: header-args:emacs-lisp :results output silent
 
 * Set personal information
 
@@ -35,6 +36,8 @@ as a dependency of your configuration.
                '("melpa" . "http://melpa.org/packages/") t)
   (add-to-list 'package-archives
                '("gnu" . "http://elpa.gnu.org/packages/") t)
+  (add-to-list 'package-archives
+               '("org" . "https://orgmode.org/elpa/") t)
   (package-initialize)
 
   (setq use-package-always-ensure t)
@@ -94,9 +97,23 @@ Copy shell env variables to the emacs environment (fixes some issues with Emacs.
 Use =f8= to open or close it.
 
 #+BEGIN_SRC emacs-lisp
+  (defun neotree-project-dir ()
+    "Open NeoTree using the git root."
+    (interactive)
+    (let ((project-dir (projectile-project-root))
+          (file-name (buffer-file-name)))
+      (neotree-toggle)
+      (if project-dir
+          (if (neo-global--window-exists-p)
+              (progn
+                (neotree-dir project-dir)
+                (neotree-find file-name)))
+        (message "Could not find git project root."))))
+
   (use-package neotree
-    :bind (("M-\\" . neotree-toggle)
-           ([f8]   . neotree-toggle))
+    :defer t
+    :bind (([f8] . neotree-toggle)
+           ([f9] . neotree-project-dir))
     :config
     (setq neo-smart-open nil))
 
@@ -108,9 +125,15 @@ Use =f8= to open or close it.
   ;;(setq neo-smart-open nil)
 #+END_SRC
 
-#+RESULTS:
-
 * Programming
+** Remove change-log-mode
+Emacs enables the change-log-mode automatically on changelog files.
+This should not be done automatically as it conflicts with
+the changelog formats you normally use in CHANGELOG.md files.
+
+#+BEGIN_SRC emacs-lisp
+  (rassq-delete-all 'change-log-mode auto-mode-alist)
+#+END_SRC
 ** Async
 I think I'm not using it yet but it might be a good idea to have it.
 #+BEGIN_SRC emacs-lisp
@@ -244,19 +267,14 @@ When running ‘projectile-switch-project’ (C-c p p), ‘neotree’ will chang
 #+RESULTS:
 
 ** Cucumber
-  
+
 #+BEGIN_SRC emacs-lisp
   (use-package feature-mode
-    :mode
-    ("\.feature$" . feature-mode)
-    ("\\.feature$" . feature--mode)
-    :config
-    (add-hook 'feature-mode-hook
-              (lambda ()
-                (local-set-key (kbd "M-r") 'feature-verify-scenario-at-pos)
-                )))
+    :ensure t
+    :disabled t
+    :after ruby-mode)
 #+END_SRC
-  
+
 ** Tab size
 
 You can read about indentation basics [[https://www.emacswiki.org/emacs/IndentationBasics][here in the emacs wiki]].
@@ -311,88 +329,216 @@ Set all indent offsets to the tab size of 2.
 #+END_SRC
 
 ** Ruby
+*** Use Ruby Mode for non-rb file extensions also
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist
+               '("\\.\\(?:cap\\|gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist
+               '("\\(?:Brewfile\\|Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'" . ruby-mode))
+#+END_SRC
+*** Ruby Electric
+Autoclose paired syntax elements like parens, quotes, etc.
+  # (use-package ruby-electric
+  #   :ensure t
+  #   :config
+  #   (add-hook 'ruby-mode-hook 'ruby-electric-mode))
+*** Chruby
 
+There is a default ruby version configured here but you can also change that interactively.
+Interactively, either call M-x chruby-use which will prompt for a ruby version, 
+or M-x chruby-use-corresponding which tries to get the version from a .ruby-version file.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package chruby
+    :ensure t
+    :config
+    (chruby "2.5.3"))
+#+END_SRC
+*** Seeing is believing
+You have to run this first:
+
+  # gem install seeing_is_believing
+
+  # (use-package seeing-is-believing
+  #   :ensure t
+  #   :config
+  #   (setq seeing-is-believing-prefix "C-.")
+  #   (add-hook 'ruby-mode-hook 'seeing-is-believing))
+*** Ruby Test Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package ruby-test-mode 
+    :ensure t
+    :config
+    (add-hook 'ruby-mode-hook 'ruby-test-mode))
+#+END_SRC
+
+*** Minitest mode
+#+BEGIN_SRC emacs-lisp
+  (use-package minitest
+    :ensure t
+    :config
+    (add-hook 'ruby-mode-hook 'minitest-mode)
+    (setq minitest-default-command '("rails" "test"))
+    (eval-after-load 'minitest
+      '(minitest-install-snippets)))
+#+END_SRC
+
+*** Haml Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package haml-mode)
+#+END_SRC
+*** Rubocop
+#+BEGIN_SRC emacs-lisp
+  (use-package rubocop
+    :ensure t
+    :config
+    (add-hook 'ruby-mode-hook 'rubocop-mode)
+    (add-hook 'ruby-mode-hook 'flycheck-mode))
+#+END_SRC
+*** Old Smartparens Ruby
 Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configuration for Ruby based modes and add two extra pairs to the rhtml mode.
 
-#+BEGIN_SRC emacs-lisp
-  (require 'smartparens-ruby)
-  (sp-with-modes '(rhtml-mode)
-    (sp-local-pair "<" ">")
-    (sp-local-pair "<%" "%>"))
-#+END_SRC
+#   (require 'smartparens-ruby)
+#   (sp-with-modes '(rhtml-mode)
+#     (sp-local-pair "<" ">")
+#     (sp-local-pair "<%" "%>"))
+*** Old Ruby End
+# (use-package ruby-end)
 
-#+BEGIN_SRC emacs-lisp
-(use-package ruby-end)
-#+END_SRC
+*** Old Robe
+#   (use-package robe
+#     :config
+#     (add-hook 'ruby-mode-hook 'robe-mode)
+#     (eval-after-load 'company
+#       '(push 'company-robe company-backends)))
 
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'ruby-mode-hook 'robe-mode)
-  
-  ;; Setting rbenv path
-;  (setq rbenv-installation-dir "/usr/local/opt/rbenv")
-;  (require 'rbenv)
-;  (global-rbenv-mode)
-   
-  (require 'cl) ; If you don't have it already
-   
-  (defun* get-closest-gemfile-root (&optional (file "Gemfile"))
-    "Determine the pathname of the first instance of FILE starting from the current directory towards root.
-  This may not do the correct thing in presence of links. If it does not find FILE, then it shall return the name
-  of FILE in the current directory, suitable for creation"
-    (let ((root (expand-file-name "/"))) ; the win32 builds should translate this correctly
-      (loop 
-       for d = default-directory then (expand-file-name ".." d)
-       if (file-exists-p (expand-file-name file d))
-       return d
-       if (equal d root)
-       return nil)))
-   
-; (require 'compile)
-  
-  (setq compilation-scroll-output "first-error")
-  
-  (defun rspec-compile-all ()
-    (interactive)
-    (compile (format (concat "cd " (get-closest-gemfile-root) ";bundle exec rspec")) t))
-  
-  (defun rspec-compile-file ()
-    (interactive)
-    ()
-    (save-buffer)
-    (compile (format "cd %s;bundle exec rspec %s"
-                     (get-closest-gemfile-root)
-                     (file-relative-name (buffer-file-name) (get-closest-gemfile-root))
-                     ) t))
-  
-  (defun rspec-compile-on-line ()
-    (interactive)
-    (compile (format "cd %s;rspec %s -l %s"
-                     (get-closest-gemfile-root)
-                     (file-relative-name (buffer-file-name) (get-closest-gemfile-root))
-                     (line-number-at-pos)
-                     ) t))
-   
-  (add-hook 'projectile-mode-hook 'projectile-rails-on)
-  
-  ; (define-key projectile-rails-mode-map (kbd "s-RET") 'projectile-rails-goto-file-at-point)
-#+END_SRC
+#     ;; Setting rbenv path
+#   ;  (setq rbenv-installation-dir "/usr/local/opt/rbenv")
+#   ;  (require 'rbenv)
+#   ;  (global-rbenv-mode)
 
+#     (require 'cl) ; If you don't have it already
+
+#     (defun* get-closest-gemfile-root (&optional (file "Gemfile"))
+#       "Determine the pathname of the first instance of FILE starting from the current directory towards root.
+#     This may not do the correct thing in presence of links. If it does not find FILE, then it shall return the name
+#     of FILE in the current directory, suitable for creation"
+#       (let ((root (expand-file-name "/"))) ; the win32 builds should translate this correctly
+#         (loop 
+#          for d = default-directory then (expand-file-name ".." d)
+#          if (file-exists-p (expand-file-name file d))
+#          return d
+#          if (equal d root)
+#          return nil)))
+
+#   ; (require 'compile)
+
+*** Old Projectile Rails
+#   (use-package projectile-rails :ensure t
+#     :config
+#     (projectile-rails-global-mode))   
+#   ; (define-key projectile-rails-mode-map (kbd "s-RET") 'projectile-rails-goto-file-at-point)
 ** Elixir
 
 Taken from https://github.com/elixir-lang/emacs-elixir
 Also, if you use smartparens you can piggyback on some of its functionality for dealing with Ruby's do .. end blocks. A sample configuration would be.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package elixir-mode
+    (use-package elixir-mode
+      :config
+      ;; This was commented out as it depends on the smartparens package used for ruby and I'm trying a different one at the moment
+      ;; (sp-with-modes '(elixir-mode)
+      ;;   (sp-local-pair "fn" "end"
+      ;;                  :when '(("SPC" "RET"))
+      ;;                  :actions '(insert navigate))
+      ;;   (sp-local-pair "do" "end"
+      ;;                  :when '(("SPC" "RET"))
+      ;;                  :post-handlers '(sp-ruby-def-post-handler)
+      ;;                  :actions '(insert navigate)))
+  (setq elixir-format-elixir-path "/usr/local/bin/elixir")
+  (setq elixir-format-mix-path "/usr/local/bin/mix")
+
+  (add-hook 'elixir-mode-hook
+            (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
+
+  (add-hook 'elixir-format-hook (lambda ()
+                                   (if (projectile-project-p)
+                                       (setq elixir-format-arguments (list "--dot-formatter" (concat (projectile-project-root) "/.formatter.exs")))
+                                     (setq elixir-format-arguments nil))))
+      )
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck-mix
     :config
-    (sp-with-modes '(elixir-mode)
-      (sp-local-pair "fn" "end"
-                     :when '(("SPC" "RET"))
-                     :actions '(insert navigate))
-      (sp-local-pair "do" "end"
-                     :when '(("SPC" "RET"))
-                     :post-handlers '(sp-ruby-def-post-handler)
-                     :actions '(insert navigate))))
+    (setq flycheck-mix-enable-checking t)
+    (add-to-list 'flycheck-checkers 'elixir-mix))
+
+  ;; (use-package flycheck-dialyxir
+  ;;   :config
+  ;;   (add-to-list 'flycheck-checkers 'elixir-dialyxir)
+  ;;   (eval-after-load 'flycheck
+  ;;     '(flycheck-dialyxir-setup)
+  ;;     '(flycheck-add-next-checker 'elixir-mix 'elixir-dialyxir)))
+
+  (defun my-elixir-dialyzer--project-root (&rest _ignored)
+    "Find directory with mix.exs."
+    (and buffer-file-name
+         (locate-dominating-file buffer-file-name "mix.exs")))
+
+  (flycheck-define-checker my-elixir-dialyzer
+    "My Elixir syntax checker based on dialyzer."
+    :command ("mix" "dialyzer" "--no-check")
+    :predicate
+    (lambda ()
+      (and
+       (flycheck-buffer-saved-p)
+       (file-exists-p "deps/dialyxir")))
+    :error-patterns
+    ((warning line-start
+              (file-name)
+              ":"
+              line
+              ": warning: "
+              (message)
+              line-end)
+     (error line-start
+            (file-name)
+            ":"
+            line
+            ":"
+            (message)
+            line-end))
+    :error-filter
+    (lambda (errors)
+      (dolist (err (flycheck-sanitize-errors errors))
+        (setf (flycheck-error-filename err)
+              (concat (my-elixir-dialyzer--project-root)
+                      (flycheck-error-filename err))))
+      errors)
+    :working-directory my-elixir-dialyzer--project-root
+    :modes elixir-mode)
+  (add-to-list 'flycheck-checkers 'my-elixir-dialyzer t)
+
+  (flycheck-add-next-checker 'elixir-mix 'my-elixir-dialyzer)
+#+END_SRC
+
+#+RESULTS:
+| my-elixir-dialyzer | my-elixir-dialyzer |
+
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package flycheck-credo
+  ;;   :defer t
+  ;;   :init 
+  ;;   (add-hook 'elixir-mode-hook 'flycheck-credo-setup)
+  ;;   :config
+  ;;   (flycheck-credo-setup))
+  (use-package flycheck-credo
+    :config
+    (flycheck-credo-setup)
+    (setq flycheck-elixir-credo-strict t))
+
+  (flycheck-add-next-checker 'my-elixir-dialyzer 'elixir-credo)
 #+END_SRC
 
 Alchemist: Elixir Tooling Integration Into Emacs
@@ -403,8 +549,10 @@ Alchemist: Elixir Tooling Integration Into Emacs
   (use-package alchemist
     :config
     (add-hook 'elixir-mode-hook 'alchemist-mode)
+    (add-hook 'elixir-mode-hook 'flycheck-mode)
     (add-to-list 'auto-mode-alist '("\\.eex$" . web-mode))
-    (setq alchemist-hooks-test-on-save t))
+    (setq alchemist-hooks-test-on-save nil)
+    (setq alchemist-test-ask-about-save nil))
 #+END_SRC
 
 ** React
@@ -468,14 +616,82 @@ Use web-mode for Marionette.js template files.
   (add-to-list 'auto-mode-alist '("\\.jst.eco$" . web-mode))
 #+END_SRC
 
+** Docker
+
+#+BEGIN_SRC emacs-lisp
+(use-package dockerfile-mode)
+#+END_SRC
+** Yaml
+
+#+BEGIN_SRC emacs-lisp
+(use-package yaml-mode)
+#+END_SRC
+** Reason
+
+See https://facebook.github.io/reason/nativeWorkflow.html
+See https://facebook.github.io/reason/tools.html
+See https://github.com/ocaml/merlin
+
+#+BEGIN_SRC emacs-lisp
+  ;; (let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
+  ;;       (when (and opam-share (file-directory-p opam-share))
+  ;;        ;; Register Merlin
+  ;;        (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
+  ;;        (autoload 'merlin-mode "merlin" nil t nil)
+  ;;        ;; Automatically start it in OCaml buffers
+  ;;        (add-hook 'tuareg-mode-hook 'merlin-mode t)
+  ;;        (add-hook 'caml-mode-hook 'merlin-mode t)
+  ;;        ;; Use opam switch to lookup ocamlmerlin binary
+  ;;        (setq merlin-command 'opam)))
+#+END_SRC
+** Elm
+
+Use `elm-mode` for syntax highlighting and integration.
+
+#+BEGIN_SRC emacs-lisp
+(use-package elm-mode :ensure t)
+#+END_SRC
+
+* SQL
+
+See https://github.com/rubensts/.emacs.d
+
+Make SQLi default to PostgreSQL syntax highlighting
+https://blogs.gentoo.org/titanofold/2011/05/17/postgresql-syntax-highlighting-in-emacs/
+
+#+BEGIN_SRC emacs-lisp
+  (eval-after-load "sql"
+    '(progn (sql-set-product 'postgres)))
+#+END_SRC
+
+Set default config for login
+https://truongtx.me/2014/08/23/setup-emacs-as-an-sql-database-client/
+
+#+BEGIN_SRC emacs-lisp
+(setq sql-postgres-login-params
+      '((user :default "gugl")
+        (database :default "postgres")
+        (server :default "localhost")
+        (port :default 5432)))
+#+END_SRC
+
+Truncate lines to better visualize many columns tables
+#+BEGIN_SRC emacs-lisp
+(add-hook 'sql-interactive-mode-hook
+          (lambda ()
+            (toggle-truncate-lines t)))
+#+END_SRC
+
 * Org Mode
 ** Source Code Language Support
 #+BEGIN_SRC emacs-lisp :results silent
-  (require 'ob-sh)
+  (use-package ob-elixir)
+
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((sh . t)
+   '((shell . t)
      (emacs-lisp . t)
+     (elixir . t)
      ))
 #+END_SRC
 
@@ -531,6 +747,19 @@ My weeks begin on Monday
   (setq calendar-week-start-day 1)
 #+END_SRC
 
+The column to which tags should be indented in a headline.
+If this number is positive, it specifies the column.  If it is negative,
+it means that the tags should be flushright to that column.  For example,
+-80 works well for a normal 80 character screen.
+When 0, place tags directly after headline text, with only one space in
+between.
+#+BEGIN_SRC emacs-lisp
+  (setq org-tags-column 120)
+#+END_SRC
+
+#+RESULTS:
+: 120
+
 ** GTD
 
 The setup here is inspired by Charles Cave and [[http://members.optusnet.com.au/~charles57/GTD/gtd_workflow.html][his GTD workflow]] but using the newer and now recommended org-capture instead of remember-mode.
@@ -570,14 +799,39 @@ Use =C-c C-t= to set a new state.
     (setq org-journal-dir "~/org/journal/"))
 #+END_SRC
 
+** Blogging
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org2blog
+    :config
+    (setq org2blog/wp-blog-alist
+          '(("elixirguides.com"
+             :url "https://elixirguides.com/xmlrpc.php"
+             :username "gugl"
+             :default-title "Hello World"
+             :default-categories ("org2blog" "emacs")
+             :tags-as-categories nil)))
+    (add-hook 'org-mode-hook #'org2blog/wp-org-mode-hook-fn))
+#+END_SRC
+
+** Agenda
+Remove the "Scheduled: " prefixes that show how many times a task has been scheduled.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-agenda-scheduled-leaders '("" ""))
+#+END_SRC
+
+#+RESULTS:
+|   |   |
+
 * Email
 
 For privacy reasons I moved my mail config in the dedicated =mail.el= file that is not in the public git repository.
 
 #+BEGIN_SRC emacs-lisp
-  (let ((file "~/.emacs.d/mail.el"))
-        (cond ((file-exists-p file)
-               (load-file file))))
+;;  (let ((file "~/.emacs.d/mail.el"))
+;;        (cond ((file-exists-p file)
+;;               (load-file file))))
 #+END_SRC
 
 * Completion using Company
@@ -647,18 +901,81 @@ The default keymap prefix for them is =C-c /=.
     (engine-mode t))
 #+END_SRC
 * General & UI preferences
+** Backup files
+#+BEGIN_SRC emacs-lisp
+  (setq
+   make-backup-files t
+   version-control t       ; use numbers for backup files
+   kept-new-versions 10
+   kept-old-versions 0
+   delete-old-versions t
+   backup-by-copying t
+   vc-make-backup-files t
+   auto-save-default nil
+   backup-directory-alist '(("." . "~/.emacs.d/backup-files")))
+#+END_SRC
+
 ** Theme and font
 
-At the moment I try the =Inconsolata= font.
-You can download it [[https://www.fontsquirrel.com/fonts/Inconsolata][here from Font Squirrel]].
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+#+END_SRC
+
+# At the moment I try the =Inconsolata= font.
+# You can download it [[https://www.fontsquirrel.com/fonts/Inconsolata][here from Font Squirrel]].
 
 #+BEGIN_SRC emacs-lisp
-  (use-package railscasts-theme
-    :config
-    (load-theme 'railscasts t nil)
-    (set-frame-font "Menlo-16"))
-  ;; (set-frame-font "Inconsolata-16")
+  ;; (use-package railscasts-theme
+  ;;   :config
+  ;;   (load-theme 'railscasts t nil)
+  ;;   (set-frame-font "Menlo-16"))
+  ;; ;; (set-frame-font "Inconsolata-16")
 #+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package spacemacs-theme
+  :ensure t
+  :defer t
+  :init
+  (load-theme 'spacemacs-dark t)
+  (setq spacemacs-theme-org-agenda-height nil)
+  (setq spacemacs-theme-org-height nil))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons-dired
+      :after (all-the-icons)
+      :init
+      (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+#+END_SRC
+
+Show icons on in ivy buffers.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons-ivy
+      :after (all-the-icons projectile ivy counsel counsel-projectile)
+      :config
+      (setq all-the-icons-ivy-file-commands
+            '(counsel-find-file
+              counsel-file-jump
+              counsel-recentf
+              counsel-projectile-find-file
+              counsel-projectile-find-dir
+              counsel-projectile))
+      (all-the-icons-ivy-setup))
+#+END_SRC
+
+# #+BEGIN_SRC emacs-lisp
+#   (use-package github-modern-theme
+#     :config
+#     (load-theme 'github-modern t))
+# #+END_SRC
+
+# #+BEGIN_SRC emacs-lisp
+#   (use-package leuven-theme
+#     :config
+#     (load-theme 'leuven-theme t))
+# #+END_SRC
 
 ** Set default font and configure font resizing
 The standard text-scale- functions just resize the text in the current buffer; 
@@ -667,8 +984,8 @@ the size of the modeline, too (this is especially helpful when presenting).
 These functions and bindings let me resize everything all together!
 
 #+BEGIN_SRC emacs-lisp
-  (setq gugl/default-font "Inconsolata")
   (setq gugl/default-font "Menlo")
+  ;; (setq gugl/default-font "IBM Plex Mono")
   (setq gugl/default-font-size 16)
   (setq gugl/current-font-size gugl/default-font-size)
   (setq gugl/font-change-increment 1.1)
@@ -677,20 +994,20 @@ These functions and bindings let me resize everything all together!
     "Set the font to `gugl/default-font' at `gugl/current-font-size'."
     (set-frame-font
      (concat gugl/default-font "-" (number-to-string gugl/current-font-size))))
-  
+
   (defun gugl/reset-font-size ()
     "Change font size back to `gugl/default-font-size'."
     (interactive)
     (setq gugl/current-font-size gugl/default-font-size)
     (gugl/set-font-size))
-  
+
   (defun gugl/increase-font-size ()
     "Increase current font size by a factor of `gugl/font-change-increment'."
     (interactive)
     (setq gugl/current-font-size
           (ceiling (* gugl/current-font-size gugl/font-change-increment)))
     (gugl/set-font-size))
-  
+
   (defun gugl/decrease-font-size ()
     "Decrease current font size by a factor of `gugl/font-change-increment', down to a minimum size of 1."
     (interactive)
@@ -698,49 +1015,63 @@ These functions and bindings let me resize everything all together!
           (max 1
                (floor (/ gugl/current-font-size gugl/font-change-increment))))
     (gugl/set-font-size))
-  
+
   (define-key global-map (kbd "C-)") 'gugl/reset-font-size)
   (define-key global-map (kbd "C-+") 'gugl/increase-font-size)
   (define-key global-map (kbd "C-=") 'gugl/increase-font-size)
   (define-key global-map (kbd "C-_") 'gugl/decrease-font-size)
   (define-key global-map (kbd "C--") 'gugl/decrease-font-size)
+
+  (gugl/reset-font-size)
 #+END_SRC
+
+#+RESULTS:
+: gugl/decrease-font-size
 
 ** Hide certain modes from the modeline
 I’d rather have only a few necessary mode identifiers on my modeline.
 This either hides or “renames” a variety of major or minor modes using the =diminish= package.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package diminish)
-  (defmacro diminish-minor-mode (filename mode &optional abbrev)
-    `(eval-after-load (symbol-name ,filename)
-       '(diminish ,mode ,abbrev)))
-  
-  (defmacro diminish-major-mode (mode-hook abbrev)
-    `(add-hook ,mode-hook
-               (lambda () (setq mode-name ,abbrev))))
-  
-  (diminish-minor-mode 'abbrev 'abbrev-mode)
-  (diminish-minor-mode 'company 'company-mode)
-  (diminish-minor-mode 'eldoc 'eldoc-mode)
-  (diminish-minor-mode 'flycheck 'flycheck-mode)
-  (diminish-minor-mode 'flyspell 'flyspell-mode)
-  (diminish-minor-mode 'global-whitespace 'global-whitespace-mode)
-  (diminish-minor-mode 'projectile 'projectile-mode)
-  (diminish-minor-mode 'ruby-end 'ruby-end-mode)
-  (diminish-minor-mode 'subword 'subword-mode)
-  (diminish-minor-mode 'undo-tree 'undo-tree-mode)
-  (diminish-minor-mode 'yard-mode 'yard-mode)
-  (diminish-minor-mode 'yasnippet 'yas-minor-mode)
-  (diminish-minor-mode 'wrap-region 'wrap-region-mode)
-  
-  (diminish-minor-mode 'paredit 'paredit-mode " π")
-  
-  (diminish-major-mode 'emacs-lisp-mode-hook "el")
-  (diminish-major-mode 'haskell-mode-hook "λ=")
-  (diminish-major-mode 'lisp-interaction-mode-hook "λ")
-  (diminish-major-mode 'python-mode-hook "Py")
+  ;; (use-package diminish)
+  ;; (defmacro diminish-minor-mode (filename mode &optional abbrev)
+  ;;   `(eval-after-load (symbol-name ,filename)
+  ;;      '(diminish ,mode ,abbrev)))
+
+  ;; (defmacro diminish-major-mode (mode-hook abbrev)
+  ;;   `(add-hook ,mode-hook
+  ;;              (lambda () (setq mode-name ,abbrev))))
+
+  ;; (diminish-minor-mode 'abbrev 'abbrev-mode)
+  ;; (diminish-minor-mode 'company 'company-mode)
+  ;; (diminish-minor-mode 'eldoc 'eldoc-mode)
+  ;; (diminish-minor-mode 'flycheck 'flycheck-mode)
+  ;; (diminish-minor-mode 'flyspell 'flyspell-mode)
+  ;; (diminish-minor-mode 'global-whitespace 'global-whitespace-mode)
+  ;; (diminish-minor-mode 'projectile 'projectile-mode)
+  ;; (diminish-minor-mode 'ruby-end 'ruby-end-mode)
+  ;; (diminish-minor-mode 'subword 'subword-mode)
+  ;; (diminish-minor-mode 'undo-tree 'undo-tree-mode)
+  ;; (diminish-minor-mode 'yard-mode 'yard-mode)
+  ;; (diminish-minor-mode 'yasnippet 'yas-minor-mode)
+  ;; (diminish-minor-mode 'wrap-region 'wrap-region-mode)
+  ;; (diminish-minor-mode 'ivy 'ivy-mode)
+  ;; (diminish-minor-mode 'guide-key 'guide-key-mode)
+  ;; (diminish-minor-mode 'autorevert 'auto-revert-mode)
+  ;; (diminish-minor-mode 'alchemist-phoenix 'alchemist-phoenix-mode)
+  ;; (diminish-minor-mode 'smartparens 'smartparens-mode)
+  ;; (diminish-minor-mode 'alchemist 'alchemist-mode)
+
+  ;; (diminish-minor-mode 'paredit 'paredit-mode " π")
+
+  ;; (diminish-major-mode 'emacs-lisp-mode-hook "el")
+  ;; (diminish-major-mode 'haskell-mode-hook "λ=")
+  ;; (diminish-major-mode 'lisp-interaction-mode-hook "λ")
+  ;; (diminish-major-mode 'python-mode-hook "Py")
 #+END_SRC
+
+#+RESULTS:
+| lambda | nil | (setq mode-name Py) |
 
 ** Disable Scrollbar and toolbar
 
@@ -770,6 +1101,15 @@ that created a new frame when using =rgrep= or =org-agenda= while neotree is ope
   (setq split-height-threshold 40)
 #+END_SRC
 
+** Eyebrowse
+#+BEGIN_SRC emacs-lisp
+(use-package eyebrowse
+  :demand t
+  :config
+  (eyebrowse-setup-opinionated-keys) ;set evil keybindings (gt gT)
+  (eyebrowse-mode t))
+#+END_SRC
+
 ** Switching between window configurations
 
 You can use C-c left or C-c right to switch to the prev or next window configuration.
@@ -785,9 +1125,57 @@ to your old more complex window configuration.
 Use Powerline with it's default theme
 
 #+BEGIN_SRC emacs-lisp
-  (use-package powerline
+  ;; (use-package powerline
+  ;;   :config
+  ;;   (powerline-default-theme))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package spaceline :ensure t
+  ;;   :init
+  ;;   (setq-default
+  ;;    powerline-height 24
+  ;;    powerline-default-separator 'wave
+  ;;    spaceline-flycheck-bullet "❖ %s"
+  ;;    spaceline-separator-dir-left '(right . right)
+  ;;    spaceline-separator-dir-right '(left . left)
+  ;;    mode-line-format '("%e" (:eval (spaceline-ml-main))))
+  ;;   :config
+  ;;   (require 'spaceline-config)
+  ;;   (spaceline-spacemacs-theme))
+
+
+
+
+
+
+
+  (use-package spaceline :ensure t
     :config
-    (powerline-default-theme))
+    (require 'spaceline-config))
+#+END_SRC
+
+Use all-the-icons to have pretty icons.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons :ensure t
+    :demand t)
+#+END_SRC
+
+Use the spaceline-all-the-icons to have a pretty modeline.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package spaceline-all-the-icons :ensure t
+    :after spaceline
+    :config 
+    (spaceline-all-the-icons-theme))
+#+END_SRC
+
+Don't compact font caches during GC. This is meant to improve performance when experiencing render performance issues while using all-the-icons.
+It was mentioned in https://github.com/domtronn/all-the-icons.el/issues/28
+
+#+BEGIN_SRC emacs-lisp
+  (setq inhibit-compacting-font-caches t)
 #+END_SRC
 
 ** Guide Key
@@ -841,7 +1229,7 @@ See the full list at https://github.com/ericdanan/counsel-projectile
     (use-package counsel-projectile
       :defer 2
       :config
-      (counsel-projectile-on)
+      (counsel-projectile-mode)
       (global-set-key (kbd "M-t") 'counsel-projectile)
   )
 #+END_SRC
@@ -888,6 +1276,50 @@ For more information see https://github.com/abo-abo/swiper
   (setq scroll-step 1) ;; keyboard scroll one line at a time
 #+END_SRC
 
+** Handling Large Files
+For handling very large files you can use either the built-in `M-x find-file-literally` command or 
+the `vlf` package. You can read about the the `vlf` package [[https://www.emacswiki.org/emacs/VLF][here]].
+
+#+BEGIN_SRC emacs-lisp
+  (use-package vlf
+    :config
+    (require 'vlf-setup))
+#+END_SRC
+
+** Undo Tree
+#+BEGIN_SRC emacs-lisp
+  (use-package undo-tree)
+#+END_SRC
+
+** Performance improvements
+
+This seems to improve the performance of `next-line` or `C-n` a lot.
+Found it here: https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
+
+#+BEGIN_SRC emacs-lisp
+  (setq auto-window-vscroll nil)
+#+END_SRC
+** Multiple Cursors
+
+Multiple Cursors is a simple way to manipulate multiple lines at once.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package multiple-cursors :ensure
+    :defer 2
+    :bind (("C-c m c" . mc/edit-lines)))
+#+END_SRC
+** Drag Stuff (move words, lines and regions)
+
+#+BEGIN_SRC emacs-lisp
+  (use-package drag-stuff
+    :config
+    (drag-stuff-global-mode 1)
+    (drag-stuff-define-keys))
+#+END_SRC
+* Books
+#+BEGIN_SRC emacs-lisp
+  ;;(use-package calibre-mode)
+#+END_SRC
 * Dashboard
 1. Displays an awesome Emacs banner!
 2. Recent files
