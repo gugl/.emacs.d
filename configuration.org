@@ -443,6 +443,8 @@ Add additional [[https://github.com/Fuco1/smartparens][smartparens]] configurati
 Taken from https://github.com/elixir-lang/emacs-elixir
 Also, if you use smartparens you can piggyback on some of its functionality for dealing with Ruby's do .. end blocks. A sample configuration would be.
 
+Elixir Mode
+
 #+BEGIN_SRC emacs-lisp
   (use-package elixir-mode
     :config
@@ -458,6 +460,8 @@ Also, if you use smartparens you can piggyback on some of its functionality for 
                                       (setq elixir-format-arguments nil))))
     )
 #+END_SRC
+
+Flycheck Mix
 
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck-mix
@@ -513,6 +517,8 @@ Also, if you use smartparens you can piggyback on some of its functionality for 
 
   (flycheck-add-next-checker 'elixir-mix 'my-elixir-dialyzer)
 #+END_SRC
+
+Flycheck Credo
 
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck-credo
